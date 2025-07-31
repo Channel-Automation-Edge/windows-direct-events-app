@@ -10,10 +10,8 @@ const API_CREDENTIALS = {
   appkey: import.meta.env.VITE_LEAD_PERFECTION_APP_KEY
 };
 
-// Base URL for API - use proxy in development, direct URL in production
-const BASE_URL = import.meta.env.DEV 
-  ? '/api/leadperfection' 
-  : 'https://api.leadperfection.com';
+// Base URL for API - use Netlify functions in all environments
+const BASE_URL = '/.netlify/functions';
 
 // Time slot mapping from identifiers (X1-X4) to military time
 export const TIME_SLOT_MAPPING = {
@@ -34,19 +32,13 @@ export const TIME_SLOT_LABELS = {
 // Get authentication token
 export const getAuthToken = async () => {
   try {
-    const formData = new URLSearchParams();
+    const endpoint = `${BASE_URL}/leadperfection-token`;
     
-    // Add credentials to form data
-    Object.entries(API_CREDENTIALS).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-    
-    const response = await fetch(`${BASE_URL}/token`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: formData
+        'Content-Type': 'application/json'
+      }
     });
     
     if (!response.ok) {
@@ -68,18 +60,20 @@ export const getForwardLookData = async (token, zipCode, productId = null, branc
       throw new Error('Authentication token is required');
     }
     
-    const formData = new URLSearchParams();
-    if (zipCode) formData.append('zip', zipCode);
-    if (productId) formData.append('productid', productId);
-    if (branchId) formData.append('branchid', branchId);
+    const endpoint = `${BASE_URL}/leadperfection-lookup`;
     
-    const response = await fetch(`${BASE_URL}/api/Leads/GetLeadsForwardLook`, {
+    // Prepare lookup data for Netlify function
+    const lookupData = {};
+    if (zipCode) lookupData.zip = zipCode;
+    if (productId) lookupData.productid = productId;
+    if (branchId) lookupData.branchid = branchId;
+    
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
-      body: formData
+      body: JSON.stringify({ token, lookupData })
     });
     
     if (!response.ok) {
@@ -194,32 +188,14 @@ export const addLead = async (token, leadData) => {
   try {
     console.log('Adding lead to LeadPerfection:', leadData);
     
-    // Create form data for the API request
-    const formData = new URLSearchParams();
+    const endpoint = `${BASE_URL}/leadperfection-add`;
     
-    // Add all the required fields
-    if (leadData.firstname) formData.append('firstname', leadData.firstname);
-    if (leadData.lastname) formData.append('lastname', leadData.lastname);
-    if (leadData.address1) formData.append('address1', leadData.address1);
-    if (leadData.address2) formData.append('address2', leadData.address2);
-    if (leadData.city) formData.append('city', leadData.city);
-    if (leadData.state) formData.append('state', leadData.state);
-    if (leadData.zip) formData.append('zip', leadData.zip);
-    if (leadData.phone) formData.append('phone', leadData.phone);
-    if (leadData.productID) formData.append('productID', leadData.productID);
-    if (leadData.email) formData.append('email', leadData.email);
-    if (leadData.srs_id) formData.append('srs_id', leadData.srs_id);
-    if (leadData.pro_id) formData.append('pro_id', leadData.pro_id);
-    if (leadData.apptdate) formData.append('apptdate', leadData.apptdate);
-    if (leadData.appttime) formData.append('appttime', leadData.appttime);
-    
-    const response = await fetch(`${BASE_URL}/api/Leads/LeadAdd`, {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
-      body: formData
+      body: JSON.stringify({ token, leadData })
     });
     
     if (!response.ok) {

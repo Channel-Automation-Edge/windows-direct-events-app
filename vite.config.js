@@ -9,18 +9,5 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
-  },
-  server: {
-    proxy: {
-      '/api/leadperfection': {
-        target: 'https://api.leadperfection.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/leadperfection/, ''),
-        secure: true,
-        headers: {
-          'Origin': 'https://api.leadperfection.com'
-        }
-      }
-    }
   }
 })

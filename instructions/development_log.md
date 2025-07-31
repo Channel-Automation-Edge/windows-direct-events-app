@@ -198,6 +198,69 @@
   - Improved responsiveness by hiding step labels on mobile
   - Added screen reader accessibility with sr-only heading
 
+## August 1, 2025
+
+### Major Infrastructure Changes
+
+#### Netlify Functions Implementation
+- **Problem**: CORS issues when calling LeadPerfection API directly from frontend in production
+- **Solution**: Implemented Netlify Functions as serverless proxy for all LeadPerfection API calls
+- **Created three Netlify Functions**:
+  - `netlify/functions/leadperfection-token.js` - Handles authentication token requests
+  - `netlify/functions/leadperfection-lookup.js` - Handles forward lookup for available time slots
+  - `netlify/functions/leadperfection-add.js` - Handles lead submission to LeadPerfection
+- **Configuration**:
+  - Added `netlify.toml` configuration file for function deployment
+  - Functions use CommonJS exports syntax for Netlify compatibility
+  - All functions include proper CORS headers and error handling
+
+#### LeadPerfection Service Refactor
+- **Removed environment-based API switching**: Previously used Vite proxy in development and direct API calls in production
+- **Unified approach**: Now uses Netlify Functions consistently in all environments
+- **Updated BASE_URL**: Changed from conditional logic to always use `/.netlify/functions`
+- **Simplified API functions**:
+  - `getAuthToken()` - Always calls `/.netlify/functions/leadperfection-token`
+  - `getForwardLookData()` - Always calls `/.netlify/functions/leadperfection-lookup`
+  - `addLead()` - Always calls `/.netlify/functions/leadperfection-add`
+- **Request format**: All functions now send JSON payloads instead of form data
+
+#### Vite Configuration Cleanup
+- **Removed Vite proxy**: Eliminated `/api/leadperfection` proxy configuration from `vite.config.js`
+- **Simplified config**: Vite config now only handles React plugin and path aliases
+- **Development workflow**: Uses `netlify dev` for local development to serve functions
+
+#### Admin Dashboard Improvements
+- **Events card repositioning**: Moved Events card to top of admin dashboard for prominence
+- **Custom delete dialogs**: Replaced browser `window.confirm` alerts with custom `DeleteConfirmDialog` component
+- **Consistent styling**: All buttons now use brand colors with white text
+- **Full-width events card**: Events card spans full width of dashboard grid
+
+#### Homepage Enhancements
+- **Logo integration**: Added Windows Direct USA logo to homepage header
+- **Responsive logo placement**: Left-aligned on desktop, centered on mobile
+- **Card restructuring**: 
+  - Removed "Upcoming Events" and "Available Slots" cards
+  - Added "Active Events" card showing dynamic count from Supabase
+- **Mobile responsiveness**: Improved text alignment and button centering on mobile devices
+
+#### Technical Improvements
+- **Form flow simplification**: Removed Step4Confirmation, making Step3DateTime the final step
+- **Success dialog**: Added custom success dialog after form submission instead of navigation
+- **API integration**: All appointments now sent directly to LeadPerfection (no local storage)
+- **Error handling**: Enhanced error handling for LeadPerfection API calls
+- **Case sensitivity fixes**: Fixed import case issues for Netlify deployment
+
+### Development Workflow Changes
+- **Local development**: Use `netlify dev` instead of `npm run dev` for full function testing
+- **Function testing**: Netlify Functions available at `http://localhost:8888/.netlify/functions/`
+- **Production deployment**: Functions automatically deployed with site to Netlify
+- **CORS resolution**: No more CORS issues in production due to server-side API calls
+
+### Breaking Changes
+- **Vite proxy removal**: `/api/leadperfection/*` endpoints no longer available
+- **Environment variables**: Functions use `process.env` instead of `import.meta.env` for credentials
+- **Development setup**: Requires Netlify CLI for local development with functions
+
 ## July 9, 2025 (Latest Updates)
 
 ### Admin Dashboard Enhancements
