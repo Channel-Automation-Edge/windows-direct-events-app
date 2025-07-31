@@ -36,15 +36,15 @@ const Home = () => {
       </div>
 
       {/* Hero Card */}
-      <div className="bg-gray-50 rounded-xl shadow-md p-8 w-full text-center md:text-left">
-        <h1 className="text-3xl font-bold mb-4">Welcome to Event App</h1>
-        <p className="text-gray-600 mb-6 max-w-2xl mx-auto md:mx-0">
-          Schedule your appointments easily with our intuitive booking system. 
-          Get started by creating a new appointment.
+      <div className="bg-gradient-to-br from-brand via-orange-500 to-orange-600 rounded-xl shadow-lg p-8 w-full text-center md:text-left">
+        <h1 className="text-3xl font-bold mb-4 text-white">Welcome to Windows Direct USA</h1>
+        <p className="text-orange-50 mb-6 max-w-2xl mx-auto md:mx-0">
+          Schedule your window consultation appointment with our expert team. 
+          Book your free in-home consultation today and discover premium window solutions.
         </p>
         <div className="flex justify-center md:justify-start">
           <Link to="/new-appointment">
-            <Button className="gap-2">
+            <Button className="gap-2 bg-white text-brand hover:bg-gray-50 border-0">
               <Calendar size={18} />
               Create Appointment
             </Button>
