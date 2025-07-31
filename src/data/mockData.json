@@ -1,0 +1,113 @@
+{
+  "staffs": [
+    {
+      "id": 1,
+      "name": "John Smith"
+    },
+    {
+      "id": 2,
+      "name": "Emma Johnson"
+    },
+    {
+      "id": 3,
+      "name": "Michael Williams"
+    },
+    {
+      "id": 4,
+      "name": "Sarah Davis"
+    },
+    {
+      "id": 5,
+      "name": "Robert Brown"
+    }
+  ],
+  "events": [
+    {
+      "name": "Home Expo 2025",
+      "srs_id": "HE2025",
+      "active": true
+    },
+    {
+      "name": "Window Installation Workshop",
+      "srs_id": "WIW2025",
+      "active": true
+    },
+    {
+      "name": "Energy Efficiency Showcase",
+      "srs_id": "EES2025",
+      "active": false
+    },
+    {
+      "name": "Renovation Fair",
+      "srs_id": "RF2025",
+      "active": true
+    },
+    {
+      "name": "Design Consultation Day",
+      "srs_id": "DCD2025",
+      "active": false
+    }
+  ],
+  "products": [
+    {
+      "id": 1001,
+      "name": "Entry Door",
+      "image": "/images/entry-door.png"
+    },
+    {
+      "id": 1002,
+      "name": "Patio Door",
+      "image": "/images/patio-door.png"
+    },
+    {
+      "id": 1003,
+      "name": "Windows",
+      "image": "/images/window.png"
+    },
+    {
+      "id": 1004,
+      "name": "Shower",
+      "image": "/images/shower.png"
+    },
+    {
+      "id": 1005,
+      "name": "Bath",
+      "image": "/images/bath.png"
+    }
+  ],
+  "appointment_choices": [
+    {
+      "id": 1,
+      "name": "In-Home Consultation"
+    },
+    {
+      "id": 2,
+      "name": "Virtual Consultation"
+    },
+    {
+      "id": 3,
+      "name": "Store Visit"
+    },
+    {
+      "id": 4,
+      "name": "Event Follow-up"
+    },
+    {
+      "id": 5,
+      "name": "Product Measurement"
+    },
+    {
+      "id": 6,
+      "name": "Installation Scheduling"
+    }
+  ],
+  "time_slots": {
+    "Monday": ["10:00", "13:00", "14:00", "15:00", "17:00", "18:00"],
+    "Tuesday": ["13:00", "14:00", "16:00", "17:00", "20:00"],
+    "Wednesday": ["11:00", "13:00", "14:00", "15:00", "18:00", "19:00"],
+    "Thursday": ["13:00", "14:00", "16:00", "17:00", "20:00"],
+    "Friday": ["11:00", "13:00", "14:00", "15:00", "18:00", "19:00"],
+    "Saturday": ["10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"],
+    "Sunday": []
+  }
+}
