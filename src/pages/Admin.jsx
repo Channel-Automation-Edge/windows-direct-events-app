@@ -270,6 +270,76 @@ const Admin = ({ isAuth, onAuthenticate }) => {
         {/* Admin cards grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           
+          {/* Events Card */}
+          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full">
+            <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
+              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                <Calendar size={18} className="text-brand" />
+                Events
+              </h2>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => openModal('event')}
+              >
+                <Plus size={16} />
+                <span className="sr-only">Add Event</span>
+              </Button>
+            </div>
+            <div className="p-4 overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SRS ID</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {events && events.length > 0 ? (
+                    events.map(event => (
+                      <tr key={event.srs_id}>
+                        <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{event.srs_id}</td>
+                        <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{event.name}</td>
+                        <td className="px-3 py-3 whitespace-nowrap text-sm">
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${event.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                            {event.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex justify-end gap-2">
+                            <button 
+                              onClick={() => openModal('event', event)}
+                              className="p-1 text-gray-500 hover:text-gray-700"
+                            >
+                              <Edit size={16} />
+                              <span className="sr-only">Edit</span>
+                            </button>
+                            <button 
+                              onClick={() => handleDelete('event', event.srs_id, event.name, 'srs_id')}
+                              className="p-1 text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 size={16} />
+                              <span className="sr-only">Delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="px-3 py-6 text-center text-gray-500 italic">
+                        No events found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           {/* Staff Card */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-1 md:col-span-1 lg:col-span-1">
             <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
@@ -377,74 +447,6 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                   No products found
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Events Card */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full">
-            <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Calendar size={18} className="text-brand" />
-                Events
-              </h2>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={() => openModal('event')}
-              >
-                <Plus size={16} />
-                <span className="sr-only">Add Event</span>
-              </Button>
-            </div>
-            <div className="p-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead>
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SRS ID</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {events && events.length > 0 ? (
-                    events.map(event => (
-                      <tr key={event.srs_id}>
-                        <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{event.srs_id}</td>
-                        <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{event.name}</td>
-                        <td className="px-3 py-3 whitespace-nowrap text-sm">
-                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${event.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                            {event.active ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 whitespace-nowrap text-sm text-right">
-                          <div className="flex gap-2 justify-end">
-                            <button 
-                              onClick={() => openModal('event', event)}
-                              className="p-1 text-gray-500 hover:text-gray-700"
-                            >
-                              <Edit size={16} />
-                              <span className="sr-only">Edit</span>
-                            </button>
-                            <button 
-                              onClick={() => handleDelete('event', event.srs_id, event.name, 'srs_id')}
-                              className="p-1 text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 size={16} />
-                              <span className="sr-only">Delete</span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="px-3 py-4 text-center text-gray-500 italic">No events found</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
             </div>
           </div>
         </div>

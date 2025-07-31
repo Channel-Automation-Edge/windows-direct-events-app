@@ -10,8 +10,10 @@ const API_CREDENTIALS = {
   appkey: import.meta.env.VITE_LEAD_PERFECTION_APP_KEY
 };
 
-// Base URL for API - using proxy to avoid CORS issues
-const BASE_URL = '/api/leadperfection';
+// Base URL for API - use proxy in development, direct URL in production
+const BASE_URL = import.meta.env.DEV 
+  ? '/api/leadperfection' 
+  : 'https://api.leadperfection.com';
 
 // Time slot mapping from identifiers (X1-X4) to military time
 export const TIME_SLOT_MAPPING = {
