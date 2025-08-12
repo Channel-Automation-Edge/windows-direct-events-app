@@ -16,7 +16,7 @@ const BASE_URL = '/.netlify/functions';
 // Time slot mapping from identifiers (X1-X4) to military time
 export const TIME_SLOT_MAPPING = {
   X1: '09:00', // 9AM 
-  X2: '11:00', // 11AM
+  X2: '10:00', // 10AM
   X3: '14:00', // 2PM
   X4: '18:00'  // 6PM
 };
@@ -24,7 +24,7 @@ export const TIME_SLOT_MAPPING = {
 // Time slot display labels
 export const TIME_SLOT_LABELS = {
   X1: '9:00 AM', 
-  X2: '11:00 AM',
+  X2: '10:00 AM',
   X3: '2:00 PM',
   X4: '6:00 PM'
 };
@@ -247,7 +247,7 @@ export const formatAppointmentForLeadPerfection = (formData) => {
     }
   }
   
-  return {
+  const payload = {
     firstname,
     lastname,
     address1: formData.address1 || '',
@@ -261,6 +261,14 @@ export const formatAppointmentForLeadPerfection = (formData) => {
     srs_id: formData.event?.srs_id || '',
     pro_id: formData.staff?.id || '',
     apptdate,
-    appttime
+    appttime,
+    sender: 362
   };
+
+  // Add notes field only if sweepstakesOnly is true
+  if (formData.sweepstakesOnly) {
+    payload.notes = 'sweepstakes';
+  }
+
+  return payload;
 };
