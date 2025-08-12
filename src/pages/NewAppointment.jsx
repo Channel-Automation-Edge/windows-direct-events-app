@@ -1,23 +1,53 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, RotateCcw } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Button } from '../components/ui/Button';
 
 // Import step components
 import Step1PersonalInfo from '../components/appointment/Step1PersonalInfo';
 import Step2Products from '../components/appointment/Step2Products';
 import Step3DateTime from '../components/appointment/Step3DateTime';
 import SuccessDialog from '../components/ui/SuccessDialog';
+import ResetConfirmDialog from '../components/ui/ResetConfirmDialog';
+import { BGPattern } from '../components/ui/BGPattern';
 
 const NewAppointment = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const { submitForm, resetForm } = useAppContext();
   const navigate = useNavigate();
   
   // Only reset form on successful form submission
   // Remove the cleanup function to prevent resetting between steps
+  
+  // Handle reset button click - show confirmation dialog
+  const handleResetClick = () => {
+    setShowResetDialog(true);
+  };
+
+  // Handle confirmed reset - reset form data and current step
+  const handleConfirmReset = async () => {
+    setIsResetting(true);
+    
+    // Reset form data
+    resetForm();
+    
+    // Reset current step to 1
+    setCurrentStep(1);
+    
+    // Close dialog
+    setShowResetDialog(false);
+    setIsResetting(false);
+  };
+
+  // Handle cancel reset
+  const handleCancelReset = () => {
+    setShowResetDialog(false);
+  };
   
   const steps = [
     { id: 1, name: 'Personal Information' },
@@ -83,8 +113,19 @@ const NewAppointment = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:py-8">
-      <h1 className="text-2xl font-bold mb-6">Schedule an Appointment</h1>
+    <div className="relative max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:py-8">
+      <BGPattern variant="grid" mask="fade-edges" size={24} fill="#e5e7eb" />
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Schedule an Appointment</h1>
+        <Button 
+          variant="secondary" 
+          onClick={handleResetClick}
+          className="gap-2 text-gray-600 hover:text-gray-800"
+        >
+          <RotateCcw size={16} />
+          Reset
+        </Button>
+      </div>
       
       {/* Step indicator */}
       <div className="mb-8">
@@ -128,6 +169,14 @@ const NewAppointment = () => {
         title="Appointment Submitted!"
         message="Thank you! Your appointment request has been successfully submitted."
         buttonText="Okay"
+      />
+      
+      {/* Reset Confirmation Dialog */}
+      <ResetConfirmDialog
+        isOpen={showResetDialog}
+        onClose={handleCancelReset}
+        onConfirm={handleConfirmReset}
+        isResetting={isResetting}
       />
     </div>
   );

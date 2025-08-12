@@ -101,12 +101,10 @@ const EventForm = ({ event = null, onClose, onSuccess }) => {
               value={formData.srs_id}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand"
-              disabled={isSubmitting || event} // Cannot edit SRS ID for existing events
+              disabled={isSubmitting}
               required
             />
-            {event && (
-              <p className="mt-1 text-xs text-gray-500">SRS ID cannot be edited for existing events.</p>
-            )}
+
           </div>
 
           <div className="mb-4">

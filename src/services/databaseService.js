@@ -167,16 +167,50 @@ export const databaseService = {
       // Get current data
       const currentData = await databaseService._getCurrentFormData();
       
-      // Generate a new ID (highest ID + 1)
-      const highestId = Math.max(...currentData.staffs.map(staff => staff.id), 0);
-      const staffWithId = { ...newStaff, id: highestId + 1 };
+      // Generate a new ID if not provided
+      if (!newStaff.id) {
+        // Generate a text ID based on staff name (3 characters)
+        let staffCode;
+        
+        // Try to use first 3 chars of staff name if possible
+        if (newStaff.name && newStaff.name.length >= 3) {
+          // Use first 3 chars of staff name
+          staffCode = newStaff.name.substring(0, 3);
+        } else if (newStaff.name) {
+          // If name is shorter than 3 chars, pad with random chars
+          const namePart = newStaff.name.substring(0, 1).toUpperCase();
+          const randomPart = Math.random().toString(36).substring(2, 4);
+          staffCode = namePart + randomPart;
+        } else {
+          // If no name, use 'STF' as fallback
+          staffCode = 'STF';
+        }
+        
+        // Ensure the code is properly formatted (first letter capitalized, rest as is)
+        staffCode = staffCode.charAt(0).toUpperCase() + staffCode.substring(1);
+        
+        // Ensure ID is unique by checking against existing IDs
+        const existingIds = currentData.staffs.map(staff => staff.id);
+        let newId = staffCode;
+        let counter = 0;
+        
+        // If ID exists, add a number suffix
+        while (existingIds.includes(newId)) {
+          counter++;
+          newId = staffCode + counter;
+        }
+        
+        // Set the generated ID
+        console.log('Generated staff ID:', newId);
+        newStaff.id = newId;
+      }
       
       // Add new staff to the array
-      const updatedStaffs = [...currentData.staffs, staffWithId];
+      const updatedStaffs = [...currentData.staffs, newStaff];
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, staffs: updatedStaffs });
-      return { success: true, data: staffWithId };
+      return { success: true, data: newStaff };
     } catch (error) {
       console.error('Error adding staff:', error);
       return { success: false, error: error.message };
@@ -189,13 +223,18 @@ export const databaseService = {
       const currentData = await databaseService._getCurrentFormData();
       
       // Find and update the staff member
-      const updatedStaffs = currentData.staffs.map(staff => 
-        staff.id === staffId ? { ...staff, ...updatedFields } : staff
-      );
+      let updatedStaff = null;
+      const updatedStaffs = currentData.staffs.map(staff => {
+        if (staff.id === staffId) {
+          updatedStaff = { ...staff, ...updatedFields };
+          return updatedStaff;
+        }
+        return staff;
+      });
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, staffs: updatedStaffs });
-      return { success: true, data: updatedStaffs.find(staff => staff.id === staffId) };
+      return { success: true, data: updatedStaff };
     } catch (error) {
       console.error('Error updating staff:', error);
       return { success: false, error: error.message };
@@ -283,13 +322,18 @@ export const databaseService = {
       const currentData = await databaseService._getCurrentFormData();
       
       // Find and update the product
-      const updatedProducts = currentData.products.map(product => 
-        product.id === productId ? { ...product, ...updatedFields } : product
-      );
+      let updatedProduct = null;
+      const updatedProducts = currentData.products.map(product => {
+        if (product.id === productId) {
+          updatedProduct = { ...product, ...updatedFields };
+          return updatedProduct;
+        }
+        return product;
+      });
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, products: updatedProducts });
-      return { success: true, data: updatedProducts.find(product => product.id === productId) };
+      return { success: true, data: updatedProduct };
     } catch (error) {
       console.error('Error updating product:', error);
       return { success: false, error: error.message };
@@ -405,26 +449,29 @@ export const databaseService = {
       return { success: false, error: error.message };
     }
   },
-  
+
   updateEvent: async (srsId, updatedFields) => {
     try {
-      // Get current data
       const currentData = await databaseService._getCurrentFormData();
       
       // Find and update the event
-      const updatedEvents = currentData.events.map(event => 
-        event.srs_id === srsId ? { ...event, ...updatedFields } : event
-      );
+      let updatedEvent = null;
+      const updatedEvents = currentData.events.map(event => {
+        if (event.srs_id === srsId) {
+          updatedEvent = { ...event, ...updatedFields };
+          return updatedEvent;
+        }
+        return event;
+      });
       
-      // Update the database
       const result = await databaseService._updateFormData({ ...currentData, events: updatedEvents });
-      return { success: true, data: updatedEvents.find(event => event.srs_id === srsId) };
+      return { success: true, data: updatedEvent };
     } catch (error) {
       console.error('Error updating event:', error);
       return { success: false, error: error.message };
     }
   },
-  
+
   deleteEvent: async (srsId) => {
     try {
       // Get current data

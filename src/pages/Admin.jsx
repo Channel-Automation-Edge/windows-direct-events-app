@@ -7,6 +7,7 @@ import ProductForm from '../components/admin/ProductForm';
 // AppointmentType form import removed
 import EventForm from '../components/admin/EventForm';
 import DeleteConfirmDialog from '../components/ui/DeleteConfirmDialog';
+import { BGPattern } from '../components/ui/BGPattern';
 
 const Admin = ({ isAuth, onAuthenticate }) => {
   // All hooks at the top level of the component
@@ -198,7 +199,8 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     
     if (loading) {
       return (
-        <div className="max-w-6xl mx-auto py-6 px-4">
+        <div className="relative max-w-6xl mx-auto py-6 px-4">
+          <BGPattern variant="grid" mask="fade-edges" size={24} fill="#e5e7eb" />
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             <Button 
@@ -222,7 +224,8 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     
     if (dataError) {
       return (
-        <div className="max-w-6xl mx-auto py-6 px-4">
+        <div className="relative max-w-6xl mx-auto py-6 px-4">
+          <BGPattern variant="grid" mask="fade-edges" size={24} fill="#e5e7eb" />
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             <Button 
@@ -254,7 +257,8 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     }
     
     return (
-      <div className="max-w-6xl mx-auto py-6 px-4">
+      <div className="relative max-w-6xl mx-auto py-6 px-4">
+        <BGPattern variant="grid" mask="fade-edges" size={24} fill="#e5e7eb" />
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <Button 
@@ -362,7 +366,10 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                 {staffs && staffs.length > 0 ? (
                   staffs.map(staff => (
                     <li key={staff.id} className="py-3 flex items-center justify-between">
-                      <span className="text-gray-800">{staff.name}</span>
+                      <div className="flex flex-col">
+                        <span className="text-gray-800 font-medium">{staff.name}</span>
+                        <span className="text-sm text-gray-500">ID: {staff.id}</span>
+                      </div>
                       <div className="flex gap-2">
                         <button 
                           onClick={() => openModal('staff', staff)}

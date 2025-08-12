@@ -170,7 +170,7 @@ const Step3DateTime = ({ onNext, onBack }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-2 sm:px-0">
       <h2 className="text-xl font-semibold mb-4">Date and Time Selection</h2>
       
       {/* Sweepstakes Only Toggle */}
@@ -227,7 +227,7 @@ const Step3DateTime = ({ onNext, onBack }) => {
                   <p className="text-sm text-gray-500">Loading available appointment times...</p>
                 </div>
               ) : (
-                <div className="w-full mx-24 lg:mx-36 border rounded-xl border-gray-200  shadow-sm">
+                <div className="w-full max-w-sm mx-auto border rounded-xl border-gray-200 shadow-sm">
 
                 <Calendar
                   mode="single"
@@ -258,12 +258,12 @@ const Step3DateTime = ({ onNext, onBack }) => {
                 const slotsForDate = availableSlots[formattedDate] || [];
                 
                 return slotsForDate.length > 0 ? (
-                  <div className="flex flex-wrap justify-center gap-3">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-3 max-w-md mx-auto">
                     {slotsForDate.map((slotId) => (
                       <button
                         key={slotId}
                         type="button"
-                        className={`py-2 px-4 w-28 text-sm font-medium rounded-md border transition-all ${
+                        className={`py-3 px-4 text-sm font-medium rounded-md border transition-all ${
                           selectedTimeSlot === slotId 
                             ? 'bg-brand text-white border-brand hover:bg-brand/90' 
                             : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
@@ -292,9 +292,9 @@ const Step3DateTime = ({ onNext, onBack }) => {
       )}
       
       {/* Consent Checkbox */}
-      <div className="mt-6 p-4">
+      <div className="mt-6 p-4 mx-2 sm:mx-0">
         <div className="flex items-start gap-3">
-          <div className="flex h-5 items-center">
+          <div className="flex h-5 items-center flex-shrink-0">
             <input
               type="checkbox"
               id="marketing-consent"
@@ -303,8 +303,8 @@ const Step3DateTime = ({ onNext, onBack }) => {
               className="h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand focus:ring-offset-0"
             />
           </div>
-          <div>
-            <p className="text-sm text-gray-600">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-600 leading-relaxed">
               By checking this box, I authorize Windows Direct USA to send me marketing calls and text messages at the number provided above, including by using an autodialer or a prerecorded message. I understand that I am not required to give this authorization as a condition of doing business with Windows Direct USA. By checking this box, I am also agreeing to Windows Direct USA's Terms of Use and Privacy Policy.
             </p>
           </div>

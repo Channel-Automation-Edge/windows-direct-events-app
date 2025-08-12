@@ -48,8 +48,9 @@ const ProductForm = ({ product = null, onClose, onSuccess }) => {
 
       let result;
       if (product) {
-        // Update existing product
+        // Update existing product (including ID if changed)
         result = await updateProduct(product.id, {
+          id: formData.id,
           name: formData.name,
           image: formData.image,
         });
@@ -96,24 +97,27 @@ const ProductForm = ({ product = null, onClose, onSuccess }) => {
         )}
 
         <form onSubmit={handleSubmit} className="p-4">
-          {!product && (
-            <div className="mb-4">
-              <label htmlFor="id" className="block text-sm font-medium text-gray-700 mb-1">
-                Product ID (Optional)
-              </label>
-              <input
-                type="text"
-                id="id"
-                name="id"
-                value={formData.id}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand"
-                disabled={isSubmitting}
-                placeholder="Leave blank for auto-generated ID"
-              />
-              <p className="mt-1 text-xs text-gray-500">If left blank, an ID will be automatically generated.</p>
-            </div>
-          )}
+          <div className="mb-4">
+            <label htmlFor="id" className="block text-sm font-medium text-gray-700 mb-1">
+              Product ID {!product && "(Optional)"}
+            </label>
+            <input
+              type="text"
+              id="id"
+              name="id"
+              value={formData.id}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand"
+              disabled={isSubmitting}
+              placeholder={!product ? "Leave blank for auto-generated ID" : "Enter product ID"}
+              required={!!product}
+            />
+            {!product && (
+              <p className="mt-1 text-xs text-gray-500">
+                If left blank, an ID will be automatically generated.
+              </p>
+            )}
+          </div>
 
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">

@@ -8,6 +8,7 @@ const StaffForm = ({ staff = null, onClose, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
+    id: '',
     name: '',
   });
 
@@ -15,6 +16,7 @@ const StaffForm = ({ staff = null, onClose, onSuccess }) => {
   useEffect(() => {
     if (staff) {
       setFormData({
+        id: staff.id || '',
         name: staff.name || '',
       });
     }
@@ -36,13 +38,24 @@ const StaffForm = ({ staff = null, onClose, onSuccess }) => {
         throw new Error('Staff name is required');
       }
 
+      // For existing staff, validate ID is provided
+      if (staff && !formData.id) {
+        throw new Error('Employee ID is required for updates');
+      }
+
       let result;
       if (staff) {
-        // Update existing staff
-        result = await updateStaff(staff.id, formData);
+        // Update existing staff (including ID if changed)
+        result = await updateStaff(staff.id, {
+          id: formData.id,
+          name: formData.name,
+        });
       } else {
         // Create new staff
-        result = await addStaff(formData);
+        result = await addStaff({
+          id: formData.id || undefined,
+          name: formData.name,
+        });
       }
 
       if (result.success) {
@@ -79,6 +92,28 @@ const StaffForm = ({ staff = null, onClose, onSuccess }) => {
         )}
 
         <form onSubmit={handleSubmit} className="p-4">
+          <div className="mb-4">
+            <label htmlFor="id" className="block text-sm font-medium text-gray-700 mb-1">
+              Employee ID {!staff && "(Optional)"}
+            </label>
+            <input
+              type="text"
+              id="id"
+              name="id"
+              value={formData.id}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand"
+              disabled={isSubmitting}
+              placeholder={!staff ? "Leave blank for auto-generated ID" : "Enter employee ID"}
+              required={!!staff}
+            />
+            {!staff && (
+              <p className="mt-1 text-xs text-gray-500">
+                If left blank, an ID will be automatically generated.
+              </p>
+            )}
+          </div>
+
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               Staff Name
