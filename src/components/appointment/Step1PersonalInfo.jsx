@@ -40,7 +40,7 @@ const Step1PersonalInfo = ({ onNext }) => {
     
     // Convert staff ID to staff object
     if (values.staff) {
-      const staffId = parseInt(values.staff);
+      const staffId = values.staff.toString();
       const staffObject = staffs.find(staff => staff.id === staffId);
       processedValues.staff = staffObject;
     }
@@ -198,7 +198,7 @@ const Step1PersonalInfo = ({ onNext }) => {
                 }`}
                 onChange={(e) => {
                   const selectedId = e.target.value;
-                  const selectedStaff = staffs.find(staff => staff.id === parseInt(selectedId));
+                  const selectedStaff = staffs.find(staff => staff.id === selectedId);
                   setFieldValue('staff', selectedId); // Update Formik with ID
                   updateFormField('staff', selectedStaff); // Update AppContext with full object
                 }}
