@@ -263,12 +263,16 @@ export const formatAppointmentForLeadPerfection = (formData) => {
     apptdate,
     appttime,
     sender: 'Channel Automation'
-    
   };
 
-  // Add notes field only if sweepstakesOnly is true
+  // Handle notes and srs_id based on submission type
   if (formData.sweepstakesOnly) {
+    // Sweepstakes entry: set notes to 'sweepstakes' and override srs_id to 329
     payload.notes = 'sweepstakes';
+    payload.srs_id = '329';
+  } else if (formData.date && formData.time) {
+    // Appointment scheduled: set notes to 'Set By ChannelAutomation'
+    payload.notes = 'Set By ChannelAutomation';
   }
 
   return payload;
