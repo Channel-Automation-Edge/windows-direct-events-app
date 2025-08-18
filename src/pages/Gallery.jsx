@@ -59,11 +59,9 @@ const Gallery = () => {
     // Sort projects by year (newest first)
     const sortedProjects = [...galleryData.pastProjects].sort((a, b) => b.project_year - a.project_year);
     
-    // Calculate pagination
-    const totalPages = Math.ceil(sortedProjects.length / projectsPerPage);
-    const startIndex = (currentPage - 1) * projectsPerPage;
-    const endIndex = startIndex + projectsPerPage;
-    const currentProjects = sortedProjects.slice(startIndex, endIndex);
+    // Calculate pagination for remaining projects (after first 3)
+    const remainingProjects = sortedProjects.slice(3);
+    const totalPages = Math.ceil(remainingProjects.length / projectsPerPage);
 
     if (totalPages <= 1) return null;
     
@@ -159,20 +157,6 @@ const Gallery = () => {
         {activeTab === 'videos' && <VideosTab data={galleryData?.videos} />}
         {activeTab === 'before-after' && <BeforeAfterTab data={galleryData?.beforeAfter} />}
       </div>
-
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
-        <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
-        <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
-        </p>
-        <Link to="/new-appointment">
-          <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
-            <Calendar size={18} />
-            Get Started Today
-          </Button>
-        </Link>
-      </div>
     </div>
   );
 };
@@ -190,19 +174,54 @@ const PastProjectsTab = ({ data, currentPage, projectsPerPage }) => {
   // Sort projects by year (newest first)
   const sortedProjects = [...data].sort((a, b) => b.project_year - a.project_year);
   
-  // Calculate pagination
+  // Show 3 newest projects first, then CTA, then remaining projects with pagination
+  const newestProjects = sortedProjects.slice(0, 3);
+  const remainingProjects = sortedProjects.slice(3);
+  
+  // Calculate pagination for remaining projects
   const startIndex = (currentPage - 1) * projectsPerPage;
   const endIndex = startIndex + projectsPerPage;
-  const currentProjects = sortedProjects.slice(startIndex, endIndex);
+  const currentRemainingProjects = remainingProjects.slice(startIndex, endIndex);
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentProjects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
-        ))}
+    <div className="space-y-12">
+      {/* 3 Newest Projects */}
+      {newestProjects.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Our Latest Projects</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {newestProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
+        <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
+        <p className="text-white/90 mb-6 max-w-2xl mx-auto">
+          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+        </p>
+        <Link to="/new-appointment">
+          <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
+            <Calendar size={18} />
+            Get Started Today
+          </Button>
+        </Link>
       </div>
-      
+
+      {/* Remaining Projects */}
+      {remainingProjects.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Projects</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentRemainingProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -261,8 +280,25 @@ const VideosTab = ({ data }) => {
     );
   }
 
+  // Sort videos by upload date (newest first)
+  const sortedVideos = [...data].sort((a, b) => {
+    // If both videos have upload dates, sort by date
+    if (a.uploadDate && b.uploadDate) {
+      return new Date(b.uploadDate) - new Date(a.uploadDate);
+    }
+    // If only one has upload date, prioritize it
+    if (a.uploadDate && !b.uploadDate) return -1;
+    if (!a.uploadDate && b.uploadDate) return 1;
+    // If neither has upload date, maintain original order
+    return 0;
+  });
+  
+  // Show 3 newest videos first, then CTA, then remaining videos
+  const newestVideos = sortedVideos.slice(0, 3);
+  const remainingVideos = sortedVideos.slice(3);
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {/* Video Player Modal */}
       {selectedVideo && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
@@ -292,17 +328,51 @@ const VideosTab = ({ data }) => {
         </div>
       )}
 
-      {/* Video Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data.map((video) => (
-          <VideoCard
-            key={video.id}
-            video={video}
-            onPlay={() => setSelectedVideo(video)}
-          />
-        ))}
+      {/* 3 Newest Videos */}
+      {newestVideos.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Latest Videos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {newestVideos.map((video) => (
+              <VideoCard
+                key={video.id}
+                video={video}
+                onPlay={() => setSelectedVideo(video)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
+        <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
+        <p className="text-white/90 mb-6 max-w-2xl mx-auto">
+          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+        </p>
+        <Link to="/new-appointment">
+          <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
+            <Calendar size={18} />
+            Get Started Today
+          </Button>
+        </Link>
       </div>
 
+      {/* Remaining Videos */}
+      {remainingVideos.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Videos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {remainingVideos.map((video) => (
+              <VideoCard
+                key={video.id}
+                video={video}
+                onPlay={() => setSelectedVideo(video)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -341,14 +411,52 @@ const BeforeAfterTab = ({ data }) => {
     );
   }
 
+  // Sort items by date (newest first) - assuming items have a date field or use array order
+  const sortedItems = [...data].reverse(); // Reverse to show newest first
+  
+  // Show 2 newest items first, then CTA, then remaining items
+  const newestItems = sortedItems.slice(0, 2);
+  const remainingItems = sortedItems.slice(2);
+
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {data.map((item) => (
-          <BeforeAfterSlider key={item.id} item={item} />
-        ))}
+    <div className="space-y-12">
+      {/* 2 Newest Items */}
+      {newestItems.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Latest Transformations</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {newestItems.map((item) => (
+              <BeforeAfterSlider key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
+        <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
+        <p className="text-white/90 mb-6 max-w-2xl mx-auto">
+          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+        </p>
+        <Link to="/new-appointment">
+          <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
+            <Calendar size={18} />
+            Get Started Today
+          </Button>
+        </Link>
       </div>
 
+      {/* Remaining Items */}
+      {remainingItems.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Transformations</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {remainingItems.map((item) => (
+              <BeforeAfterSlider key={item.id} item={item} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

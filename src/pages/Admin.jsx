@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
-import { User, Lock, Plus, Edit, Trash2, CheckCircle2, Calendar, Users, Package, MapPin, Upload, X, LogIn, LogOut } from 'lucide-react';
+import { User, Lock, Plus, Edit, Trash2, CheckCircle2, Calendar, Users, Package, MapPin, Upload, X, LogIn, LogOut, Image, Video, RefreshCw, FolderOpen } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import StaffForm from '../components/admin/StaffForm';
 import ProductForm from '../components/admin/ProductForm';
@@ -8,8 +8,13 @@ import ProductForm from '../components/admin/ProductForm';
 import EventForm from '../components/admin/EventForm';
 import EventsCSVUpload from '../components/admin/EventsCSVUpload';
 import StaffCSVUpload from '../components/admin/StaffCSVUpload';
+import VideoForm from '../components/admin/VideoForm';
+import BeforeAfterForm from '../components/admin/BeforeAfterForm';
+import ProjectForm from '../components/admin/ProjectForm';
+import GallerySection from '../components/admin/GallerySection';
 import DeleteConfirmDialog from '../components/ui/DeleteConfirmDialog';
 import { BGPattern } from '../components/ui/BGPattern';
+import { galleryService } from '../services/galleryService';
 
 const Admin = ({ isAuth, onAuthenticate }) => {
   // All hooks at the top level of the component
@@ -55,6 +60,15 @@ const Admin = ({ isAuth, onAuthenticate }) => {
   const [csvDialogOpen, setCsvDialogOpen] = useState(false);
   const [staffCsvUploading, setStaffCsvUploading] = useState(false);
   const [staffCsvDialogOpen, setStaffCsvDialogOpen] = useState(false);
+  
+  // Gallery management state
+  const [galleryData, setGalleryData] = useState({
+    videos: [],
+    beforeAfter: [],
+    pastProjects: []
+  });
+  const [galleryLoading, setGalleryLoading] = useState(false);
+  const [activeGalleryTab, setActiveGalleryTab] = useState('videos');
   
   // State for events pagination
   const [eventsCurrentPage, setEventsCurrentPage] = useState(1);
@@ -199,15 +213,29 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     }
   };
   
-  // Refresh data only when authentication state changes from false to true
-  // or when the user explicitly requests a refresh through the Try Again button
+  // Fetch data when component mounts
   useEffect(() => {
-    if (isAuth && !dataFetched) {
-      console.log('Admin: Fetching data on auth or refresh request');
+    if (!dataFetched) {
+      console.log('Admin: Fetching data once on mount');
       refreshData();
+      fetchGalleryData();
       setDataFetched(true);
     }
-  }, [isAuth, dataFetched, refreshData]);
+  }, [dataFetched, refreshData]);
+
+  // Fetch gallery data
+  const fetchGalleryData = async () => {
+    try {
+      setGalleryLoading(true);
+      const data = await galleryService.getGalleryData();
+      setGalleryData(data);
+    } catch (error) {
+      console.error('Error fetching gallery data:', error);
+      setAlert({ type: 'error', message: 'Failed to load gallery data' });
+    } finally {
+      setGalleryLoading(false);
+    }
+  };
   
   // Auto-hide alerts after 5 seconds
   useEffect(() => {
@@ -237,6 +265,61 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     setAlert({ type: 'success', message });
     // Ensure we refresh data after an action
     setDataFetched(false);
+  };
+
+  // Gallery CRUD handlers
+  const handleGallerySuccess = (message) => {
+    closeModal();
+    setAlert({ type: 'success', message });
+    fetchGalleryData(); // Refresh gallery data
+  };
+
+  const handleVideoSubmit = async (videoData) => {
+    try {
+      const result = editItem 
+        ? await galleryService.videos.update(editItem.id, videoData)
+        : await galleryService.videos.add(videoData);
+      
+      if (result.success) {
+        handleGallerySuccess(editItem ? 'Video updated successfully' : 'Video added successfully');
+      } else {
+        setAlert({ type: 'error', message: result.error });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Failed to save video' });
+    }
+  };
+
+  const handleBeforeAfterSubmit = async (beforeAfterData) => {
+    try {
+      const result = editItem 
+        ? await galleryService.beforeAfter.update(editItem.id, beforeAfterData)
+        : await galleryService.beforeAfter.add(beforeAfterData);
+      
+      if (result.success) {
+        handleGallerySuccess(editItem ? 'Before/After updated successfully' : 'Before/After added successfully');
+      } else {
+        setAlert({ type: 'error', message: result.error });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Failed to save before/after' });
+    }
+  };
+
+  const handleProjectSubmit = async (projectData) => {
+    try {
+      const result = editItem 
+        ? await galleryService.pastProjects.update(editItem.id, projectData)
+        : await galleryService.pastProjects.add(projectData);
+      
+      if (result.success) {
+        handleGallerySuccess(editItem ? 'Project updated successfully' : 'Project added successfully');
+      } else {
+        setAlert({ type: 'error', message: result.error });
+      }
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Failed to save project' });
+    }
   };
   
   // Handle deletion with confirmation
@@ -273,14 +356,27 @@ const Admin = ({ isAuth, onAuthenticate }) => {
         case 'event':
           result = await deleteEvent(id);
           break;
+        case 'video':
+          result = await galleryService.videos.delete(id);
+          break;
+        case 'beforeAfter':
+          result = await galleryService.beforeAfter.delete(id);
+          break;
+        case 'project':
+          result = await galleryService.pastProjects.delete(id);
+          break;
         default:
           throw new Error('Invalid item type');
       }
       
       if (result.success) {
         setAlert({ type: 'success', message: `${name} has been deleted successfully.` });
-        // Refresh data
-        setDataFetched(false);
+        // Refresh data based on type
+        if (['video', 'beforeAfter', 'project'].includes(type)) {
+          fetchGalleryData();
+        } else {
+          setDataFetched(false);
+        }
       } else {
         setAlert({ type: 'error', message: result.error || `Failed to delete ${name}.` });
       }
@@ -683,7 +779,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           </div>
 
           {/* Products Card */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-1 md:col-span-1 lg:col-span-2">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full md:col-span-2 lg:col-span-2 flex flex-col">
             <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
               <h2 className="font-semibold text-gray-800 flex items-center gap-2">
                 <Package size={18} className="text-brand" />
@@ -699,49 +795,175 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                 <span className="sr-only">Add Product</span>
               </Button>
             </div>
-            <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products && products.length > 0 ? (
-                products.map(product => (
-                  <div key={product.id} className="border rounded-md overflow-hidden relative group">
-                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={() => openModal('product', product)}
-                        className="p-1 bg-white rounded-full shadow-md text-gray-600 hover:text-gray-900"
-                      >
-                        <Edit size={16} />
-                        <span className="sr-only">Edit</span>
-                      </button>
-                      <button 
-                        onClick={() => handleDelete('product', product.id, product.name)}
-                        className="p-1 bg-white rounded-full shadow-md text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 size={16} />
-                        <span className="sr-only">Delete</span>
-                      </button>
+            <div className="flex-1 p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {products && products.length > 0 ? (
+                  products.map(product => (
+                    <div key={product.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="aspect-square bg-gray-50 flex items-center justify-center relative">
+                        {product.image ? (
+                          <img 
+                            src={product.image} 
+                            alt={product.name}
+                            className="w-full h-full object-contain p-4"
+                          />
+                        ) : (
+                          <Package size={48} className="text-brand" />
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <button 
+                            onClick={() => openModal('product', product)}
+                            className="p-1.5 bg-white/80 hover:bg-white rounded-full shadow-sm transition-colors"
+                            title="Edit"
+                          >
+                            <Edit size={14} className="text-gray-600" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete('product', product.id, product.name)}
+                            className="p-1.5 bg-white/80 hover:bg-white rounded-full shadow-sm transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} className="text-red-500" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-3 text-center">
+                        <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
+                        <p className="text-xs text-gray-500 mt-1">ID: {product.id}</p>
+                      </div>
                     </div>
-                    <div className="h-40 bg-gray-100 flex items-center justify-center p-2">
-                      <img 
-                        src={product.image || 'https://placehold.co/400x300?text=No+Image'} 
-                        alt={product.name} 
-                        className="h-full object-contain"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://placehold.co/400x300?text=Image+Not+Found';
-                        }}
-                      />
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-medium text-gray-800">{product.name}</h3>
-                      <p className="text-xs text-gray-500">ID: {product.id}</p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-8 text-gray-500 italic">
+                    No products found
                   </div>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-6 text-gray-500 italic">
-                  No products found
-                </div>
-              )}
+                )}
+              </div>
             </div>
+          </div>
+          {/* Gallery Management Card */}
+          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full flex flex-col">
+            <div className="bg-orange-50 px-4 py-3 border-b">
+              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                <Image size={18} className="text-brand" />
+                Gallery Management
+              </h2>
+            </div>
+            
+            {galleryLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : (
+              <div className="p-6">
+                {/* Gallery Tabs */}
+                <div className="mb-6">
+                  <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+                    {[
+                      { id: 'videos', label: 'Videos', icon: Video, count: galleryData.videos?.length || 0 },
+                      { id: 'beforeAfter', label: 'Before & After', icon: RefreshCw, count: galleryData.beforeAfter?.length || 0 },
+                      { id: 'pastProjects', label: 'Past Projects', icon: FolderOpen, count: galleryData.pastProjects?.length || 0 }
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveGalleryTab(tab.id)}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                          activeGalleryTab === tab.id
+                            ? 'bg-white text-brand shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        <tab.icon size={16} />
+                        {tab.label}
+                        <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">
+                          {tab.count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Gallery Content */}
+                {activeGalleryTab === 'videos' && (
+                  <GallerySection
+                    title="Videos"
+                    items={galleryData.videos || []}
+                    onAdd={() => openModal('video')}
+                    onEdit={(item) => openModal('video', item)}
+                    onDelete={(item) => handleDelete('video', item.id, item.title)}
+                    renderItem={(video) => (
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={video.thumbnail} 
+                          alt={video.title}
+                          className="w-16 h-12 object-cover rounded flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate">{video.title}</h4>
+                          {video.uploadDate && (
+                            <p className="text-sm text-gray-500">Uploaded: {video.uploadDate}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  />
+                )}
+
+                {activeGalleryTab === 'beforeAfter' && (
+                  <GallerySection
+                    title="Before & After"
+                    items={galleryData.beforeAfter || []}
+                    onAdd={() => openModal('beforeAfter')}
+                    onEdit={(item) => openModal('beforeAfter', item)}
+                    onDelete={(item) => handleDelete('beforeAfter', item.id, item.title)}
+                    renderItem={(item) => (
+                      <div className="flex items-center gap-4">
+                        <div className="flex gap-2">
+                          <img 
+                            src={item.beforeImage} 
+                            alt={`${item.title} - Before`}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                          <img 
+                            src={item.afterImage} 
+                            alt={`${item.title} - After`}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{item.title}</h4>
+                          <p className="text-sm text-gray-500 truncate">{item.description}</p>
+                        </div>
+                      </div>
+                    )}
+                  />
+                )}
+
+                {activeGalleryTab === 'pastProjects' && (
+                  <GallerySection
+                    title="Past Projects"
+                    items={galleryData.pastProjects || []}
+                    onAdd={() => openModal('project')}
+                    onEdit={(item) => openModal('project', item)}
+                    onDelete={(item) => handleDelete('project', item.id, item.name)}
+                    renderItem={(project) => (
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={project.featured_image} 
+                          alt={project.name}
+                          className="w-16 h-12 object-cover rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{project.name}</h4>
+                          <p className="text-sm text-gray-500">{project.address}</p>
+                          <p className="text-xs text-gray-400">{project.completion_date}</p>
+                        </div>
+                      </div>
+                    )}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
         
@@ -762,13 +984,35 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           />
         )}
         
-        {/* Appointment type modal removed */}
-        
         {activeModal === 'event' && (
           <EventForm 
             event={editItem}
             onClose={closeModal}
-            onSuccess={(data) => handleSuccess(`Event ${editItem ? 'updated' : 'added'} successfully!`)}
+            onSuccess={handleSuccess}
+          />
+        )}
+        
+        {activeModal === 'video' && (
+          <VideoForm
+            video={editItem}
+            onClose={closeModal}
+            onSuccess={handleVideoSubmit}
+          />
+        )}
+        
+        {activeModal === 'beforeAfter' && (
+          <BeforeAfterForm
+            beforeAfter={editItem}
+            onClose={closeModal}
+            onSuccess={handleBeforeAfterSubmit}
+          />
+        )}
+        
+        {activeModal === 'project' && (
+          <ProjectForm
+            project={editItem}
+            onClose={closeModal}
+            onSuccess={handleProjectSubmit}
           />
         )}
         

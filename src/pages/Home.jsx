@@ -65,7 +65,7 @@ const Home = () => {
       <div className="flex justify-center md:justify-start mb-8">
         <img 
           src={brandSettings?.logo || "https://f005.backblazeb2.com/file/project-starfish/logo/windows+direct+usa+logo+3.png"} 
-          alt={`${brandSettings?.name || 'Windows Direct USA'} Logo`} 
+          alt={`${brandSettings?.name || 'Your Company Name'} Logo`} 
           className="h-16 md:h-20 object-contain"
         />
       </div>
@@ -79,7 +79,7 @@ const Home = () => {
             : 'linear-gradient(to bottom right, #f97316, #ea580c, #dc2626)'
         }}
       >
-        <h1 className="text-3xl font-bold mb-4 text-white">Welcome to {brandSettings?.name || 'Windows Direct USA'}</h1>
+        <h1 className="text-3xl font-bold mb-4 text-white">Welcome to {brandSettings?.name || 'Your Company Name'}</h1>
         <p className="text-orange-50 mb-6 max-w-2xl mx-auto md:mx-0">
           Schedule your basement renovation consultation appointment with our expert team. 
           Book your free in-home consultation today and discover premium basement renovation solutions.

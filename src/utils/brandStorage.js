@@ -35,7 +35,7 @@ export const extractBrandSettings = (formData) => {
   if (!formData) return null;
   
   return {
-    name: formData.name || 'Windows Direct USA',
+    name: formData.name || 'Your Company Name',
     logo: formData.content?.logo || null,
     favicon: formData.favicon || null,
     accentColor: formData.colors?.accent || null,

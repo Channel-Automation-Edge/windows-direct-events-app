@@ -3,63 +3,64 @@
     "videos": [
       {
         "id": "video-1",
-        "title": "Basement Transformation - Arlington Heights",
+        "title": "Complete Basement Transformation - Arlington Heights",
         "url": "https://www.youtube.com/embed/dQw4w9WgXcQ",
         "thumbnail": "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",
-        "description": "Complete Basement Remodeling project showcasing our premium window installation services."
+        "description": "Complete basement renovation showcasing our premium basement remodeling services including waterproofing, flooring, and lighting."
       },
       {
         "id": "video-2", 
-        "title": "Before & After - Window Replacement",
+        "title": "Before & After - Basement Renovation",
         "url": "https://www.youtube.com/embed/oHg5SJYRHA0",
         "thumbnail": "https://img.youtube.com/vi/oHg5SJYRHA0/maxresdefault.jpg",
-        "description": "See the dramatic difference our energy-efficient windows make."
+        "description": "See the dramatic difference our basement renovation services make in transforming unused spaces."
       },
       {
         "id": "video-3",
-        "title": "Customer Testimonial - Chicago Project",
+        "title": "Customer Testimonial - Chicago Basement Project",
         "url": "https://www.youtube.com/embed/iik25wqIuFo",
         "thumbnail": "https://img.youtube.com/vi/iik25wqIuFo/maxresdefault.jpg",
-        "description": "Hear from satisfied customers about their experience with our team."
+        "description": "Hear from satisfied customers about their basement renovation experience with our team."
       }
     ],
     "beforeAfter": [
       {
         "id": "ba-1",
-        "title": "Living Room Window Upgrade",
+        "title": "Basement Living Room Transformation",
         "beforeImage": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
         "afterImage": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-        "description": "Transformed this living space with energy-efficient double-pane windows."
+        "description": "Transformed this dark basement into a bright, welcoming living space with proper lighting and modern finishes."
       },
       {
         "id": "ba-2",
-        "title": "Kitchen Window Renovation",
+        "title": "Basement Kitchen Addition",
         "beforeImage": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
         "afterImage": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
-        "description": "Modern kitchen windows that bring in natural light and improve ventilation."
+        "description": "Added a full basement kitchen with modern appliances and waterproof flooring for entertaining."
       },
       {
         "id": "ba-3",
-        "title": "Bedroom Window Replacement",
+        "title": "Basement Bedroom Suite",
         "beforeImage": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
         "afterImage": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-        "description": "Upgraded bedroom windows for better insulation and noise reduction."
+        "description": "Created a comfortable basement bedroom with proper egress windows and moisture control."
       },
       {
         "id": "ba-4",
-        "title": "Bathroom Window Makeover",
+        "title": "Basement Bathroom Addition",
         "beforeImage": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
         "afterImage": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
-        "description": "Privacy-focused bathroom windows with frosted glass and improved ventilation."
+        "description": "Full basement bathroom installation with waterproofing and modern fixtures."
       }
     ],
     "pastProjects": [
       {
         "id": "project-1",
-        "name": "Complete Basement Window Renovation",
-        "tags": ["Basement Remodeling"],
+        "name": "Complete Basement Renovation - Arlington Heights",
+        "tags": ["Basement Remodeling", "Waterproofing", "Flooring"],
         "address": "Arlington Heights, IL",
-        "project_year": 2024,
+        "completion_date": "2024-03-15",
+        "project_duration": "3 weeks",
         "featured_image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
         "project_photos": [
           "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
@@ -68,14 +69,15 @@
           "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
           "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800"
         ],
-        "description": "A comprehensive basement renovation featuring new egress windows, improved lighting, and enhanced moisture control. This project transformed a dark, unused basement into a bright, functional living space."
+        "description": "A comprehensive basement renovation featuring waterproofing, luxury vinyl flooring, recessed lighting, and a full entertainment area. This project transformed a dark, unused basement into a bright, functional family space."
       },
       {
         "id": "project-2",
-        "name": "Historic Home Window Restoration",
-        "tags": ["Basement Remodeling"],
+        "name": "Historic Home Basement Restoration - Evanston",
+        "tags": ["Basement Remodeling", "Historic Preservation"],
         "address": "Evanston, IL",
-        "project_year": 2023,
+        "completion_date": "2024-02-28",
+        "project_duration": "4 weeks",
         "featured_image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
         "project_photos": [
           "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
@@ -83,28 +85,30 @@
           "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
           "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800"
         ],
-        "description": "Careful restoration of original windows in a 1920s historic home, maintaining architectural integrity while improving energy efficiency."
+        "description": "Careful restoration of a 1920s historic home basement, maintaining architectural character while adding modern amenities and moisture control systems."
       },
       {
         "id": "project-3",
-        "name": "Modern Condo Window Upgrade",
-        "tags": ["Basement Remodeling"],
+        "name": "Modern Basement Office Suite - Chicago",
+        "tags": ["Basement Remodeling", "Home Office"],
         "address": "Chicago, IL",
-        "project_year": 2024,
+        "completion_date": "2024-01-20",
+        "project_duration": "2 weeks",
         "featured_image": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
         "project_photos": [
           "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
           "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
           "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800"
         ],
-        "description": "Complete window replacement in a downtown Chicago condo, featuring floor-to-ceiling windows with spectacular city views."
+        "description": "Created a professional basement home office with built-in desks, proper lighting, and climate control for year-round comfort."
       },
       {
         "id": "project-4",
-        "name": "Suburban Family Home Makeover",
-        "tags": ["Basement Remodeling"],
+        "name": "Family Recreation Room - Naperville",
+        "tags": ["Basement Remodeling", "Entertainment"],
         "address": "Naperville, IL",
-        "project_year": 2024,
+        "completion_date": "2024-04-10",
+        "project_duration": "3 weeks",
         "featured_image": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
         "project_photos": [
           "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
@@ -114,7 +118,7 @@
           "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
           "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800"
         ],
-        "description": "Full home window replacement for a growing family, focusing on safety, energy efficiency, and natural light optimization."
+        "description": "Full basement transformation into a family recreation room with game area, wet bar, and theater seating for the ultimate entertainment space."
       }
     ]
   }
