@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
-import { User, Lock, Plus, Edit, Trash2, CheckCircle2, Calendar, Users, Package, MapPin, Upload, X, LogIn, LogOut } from 'lucide-react';
+import { User, Lock, Plus, Edit, Trash2, CheckCircle2, Calendar, Users, Package, MapPin, Upload, X, LogIn, LogOut, Search } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import StaffForm from '../components/admin/StaffForm';
 import ProductForm from '../components/admin/ProductForm';
@@ -10,6 +10,7 @@ import EventsCSVUpload from '../components/admin/EventsCSVUpload';
 import StaffCSVUpload from '../components/admin/StaffCSVUpload';
 import DeleteConfirmDialog from '../components/ui/DeleteConfirmDialog';
 import { BGPattern } from '../components/ui/BGPattern';
+import SearchInput from '../components/ui/SearchInput';
 
 const Admin = ({ isAuth, onAuthenticate }) => {
   // All hooks at the top level of the component
@@ -63,13 +64,28 @@ const Admin = ({ isAuth, onAuthenticate }) => {
   // State for staff pagination
   const [staffCurrentPage, setStaffCurrentPage] = useState(1);
   const staffPerPage = 8;
+  
+  // State for search functionality
+  const [eventsSearchTerm, setEventsSearchTerm] = useState('');
+  const [staffSearchTerm, setStaffSearchTerm] = useState('');
 
-  // Sort and paginate events
+  // Sort, filter and paginate events
   const getSortedAndPaginatedEvents = () => {
     if (!events || events.length === 0) return { paginatedEvents: [], totalPages: 0 };
     
+    // Filter events based on search term
+    let filteredEvents = events;
+    if (eventsSearchTerm.trim()) {
+      const searchLower = eventsSearchTerm.toLowerCase().trim();
+      filteredEvents = events.filter(event => 
+        event.name.toLowerCase().includes(searchLower) ||
+        event.srs_id.toLowerCase().includes(searchLower) ||
+        (event.active ? 'active' : 'inactive').includes(searchLower)
+      );
+    }
+    
     // Sort events: active first, then alphabetically by name
-    const sortedEvents = [...events].sort((a, b) => {
+    const sortedEvents = [...filteredEvents].sort((a, b) => {
       // First priority: active events at top
       if (a.active !== b.active) {
         return b.active - a.active; // true (1) comes before false (0)
@@ -87,12 +103,22 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     return { paginatedEvents, totalPages, totalEvents: sortedEvents.length };
   };
 
-  // Sort and paginate staff
+  // Sort, filter and paginate staff
   const getSortedAndPaginatedStaff = () => {
     if (!staffs || staffs.length === 0) return { paginatedStaff: [], totalPages: 0 };
     
+    // Filter staff based on search term
+    let filteredStaff = staffs;
+    if (staffSearchTerm.trim()) {
+      const searchLower = staffSearchTerm.toLowerCase().trim();
+      filteredStaff = staffs.filter(staff => 
+        staff.name.toLowerCase().includes(searchLower) ||
+        staff.id.toLowerCase().includes(searchLower)
+      );
+    }
+    
     // Sort staff alphabetically by name
-    const sortedStaff = [...staffs].sort((a, b) => {
+    const sortedStaff = [...filteredStaff].sort((a, b) => {
       return a.name.localeCompare(b.name);
     });
     
@@ -103,6 +129,17 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     const paginatedStaff = sortedStaff.slice(startIndex, endIndex);
     
     return { paginatedStaff, totalPages, totalStaff: sortedStaff.length };
+  };
+
+  // Clear search when search term changes and reset pagination
+  const handleEventsSearch = (searchTerm) => {
+    setEventsSearchTerm(searchTerm);
+    setEventsCurrentPage(1); // Reset to first page when searching
+  };
+  
+  const handleStaffSearch = (searchTerm) => {
+    setStaffSearchTerm(searchTerm);
+    setStaffCurrentPage(1); // Reset to first page when searching
   };
 
   // Handle CSV upload for bulk event replacement
@@ -119,8 +156,9 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           type: 'success',
           message: result.message || `Successfully uploaded ${newEvents.length} events`
         });
-        // Reset pagination to first page after upload
+        // Reset pagination and search after upload
         setEventsCurrentPage(1);
+        setEventsSearchTerm('');
         // Reset the upload component
         if (resetUploadComponent) {
           resetUploadComponent();
@@ -235,6 +273,9 @@ const Admin = ({ isAuth, onAuthenticate }) => {
   const handleSuccess = (message) => {
     closeModal();
     setAlert({ type: 'success', message });
+    // Reset pagination when data changes
+    setEventsCurrentPage(1);
+    setStaffCurrentPage(1);
     // Ensure we refresh data after an action
     setDataFetched(false);
   };
@@ -279,6 +320,9 @@ const Admin = ({ isAuth, onAuthenticate }) => {
       
       if (result.success) {
         setAlert({ type: 'success', message: `${name} has been deleted successfully.` });
+        // Reset pagination when data changes
+        setEventsCurrentPage(1);
+        setStaffCurrentPage(1);
         // Refresh data
         setDataFetched(false);
       } else {
@@ -463,32 +507,41 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           
           {/* Events Card */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full flex flex-col">
-            <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Calendar size={18} className="text-brand" />
-                Events
-              </h2>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={() => setCsvDialogOpen(true)}
-                  title="Bulk Upload Events"
-                >
-                  <Upload size={16} />
-                  <span className="sr-only">Bulk Upload Events</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={() => openModal('event')}
-                >
-                  <Plus size={16} />
-                  <span className="sr-only">Add Event</span>
-                </Button>
+            <div className="bg-orange-50 px-4 py-3 border-b">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <Calendar size={18} className="text-brand" />
+                  Events
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setCsvDialogOpen(true)}
+                    title="Bulk Upload Events"
+                  >
+                    <Upload size={16} />
+                    <span className="sr-only">Bulk Upload Events</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => openModal('event')}
+                  >
+                    <Plus size={16} />
+                    <span className="sr-only">Add Event</span>
+                  </Button>
+                </div>
               </div>
+              <SearchInput
+                value={eventsSearchTerm}
+                onChange={handleEventsSearch}
+                onClear={() => handleEventsSearch('')}
+                placeholder="Search events by name, SRS ID, or status..."
+                className="w-full"
+              />
             </div>
             <div className="flex-1 overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 table-fixed">
@@ -536,7 +589,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                     ) : (
                       <tr>
                         <td colSpan="4" className="px-3 py-6 text-center text-gray-500 italic">
-                          No events found
+                          {eventsSearchTerm ? `No events found matching "${eventsSearchTerm}"` : 'No events found'}
                         </td>
                       </tr>
                     );
@@ -584,32 +637,41 @@ const Admin = ({ isAuth, onAuthenticate }) => {
 
           {/* Staff Card */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-1 md:col-span-1 lg:col-span-1 flex flex-col">
-            <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Users size={18} className="text-brand" />
-                Staff Members
-              </h2>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={() => setStaffCsvDialogOpen(true)}
-                  title="Bulk Upload Staff"
-                >
-                  <Upload size={16} />
-                  <span className="sr-only">Bulk Upload Staff</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0"
-                  onClick={() => openModal('staff')}
-                >
-                  <Plus size={16} />
-                  <span className="sr-only">Add Staff</span>
-                </Button>
+            <div className="bg-orange-50 px-4 py-3 border-b">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <Users size={18} className="text-brand" />
+                  Staff Members
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setStaffCsvDialogOpen(true)}
+                    title="Bulk Upload Staff"
+                  >
+                    <Upload size={16} />
+                    <span className="sr-only">Bulk Upload Staff</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => openModal('staff')}
+                  >
+                    <Plus size={16} />
+                    <span className="sr-only">Add Staff</span>
+                  </Button>
+                </div>
               </div>
+              <SearchInput
+                value={staffSearchTerm}
+                onChange={handleStaffSearch}
+                onClear={() => handleStaffSearch('')}
+                placeholder="Search staff by name or ID..."
+                className="w-full"
+              />
             </div>
             <div className="flex-1 p-4">
               <ul className="divide-y divide-gray-200">
@@ -641,7 +703,9 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                     </li>
                   ))
                   ) : (
-                    <li className="py-3 text-gray-500 italic">No staff members found</li>
+                    <li className="py-3 text-gray-500 italic">
+                      {staffSearchTerm ? `No staff found matching "${staffSearchTerm}"` : 'No staff members found'}
+                    </li>
                   );
                 })()}
               </ul>
