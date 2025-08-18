@@ -213,6 +213,8 @@ export const addLead = async (token, leadData) => {
 
 // Helper function to format appointment data for LeadPerfection
 export const formatAppointmentForLeadPerfection = (formData) => {
+  console.log('formatAppointmentForLeadPerfection - formData.staff:', formData.staff);
+  
   // Parse the full name into first and last name
   const nameParts = (formData.fullName || '').trim().split(' ');
   const firstname = nameParts[0] || '';

@@ -73,6 +73,7 @@ export function AppProvider({ children }) {
       const token = await getAuthToken();
       
       // Format appointment data for LeadPerfection
+      console.log('Form data before formatting:', formData);
       const leadData = formatAppointmentForLeadPerfection(formData);
       console.log('Formatted lead data:', leadData);
       
