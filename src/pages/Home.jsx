@@ -6,6 +6,7 @@ import { BGPattern } from '../components/ui/BGPattern';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Calendar, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
 import { databaseService } from '../services/databaseService';
+import { getBrandSettings } from '../utils/brandStorage';
 
 // Counter animation component
 const AnimatedCounter = ({ value, duration = 2 }) => {
@@ -35,21 +36,26 @@ const AnimatedCounter = ({ value, duration = 2 }) => {
 const Home = () => {
   const [activeEventsCount, setActiveEventsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [brandSettings, setBrandSettings] = useState(null);
 
   useEffect(() => {
-    const fetchActiveEvents = async () => {
+    const fetchData = async () => {
       try {
+        // Get brand settings from localStorage
+        const settings = getBrandSettings();
+        setBrandSettings(settings);
+        
         const events = await databaseService.getEvents(true); // Get only active events
         setActiveEventsCount(events.length);
       } catch (error) {
-        console.error('Error fetching active events:', error);
+        console.error('Error fetching data:', error);
         setActiveEventsCount(0);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchActiveEvents();
+    fetchData();
   }, []);
 
   return (
@@ -58,18 +64,25 @@ const Home = () => {
       {/* Logo */}
       <div className="flex justify-center md:justify-start mb-8">
         <img 
-          src="https://f005.backblazeb2.com/file/project-starfish/logo/windows+direct+usa+logo+3.png" 
-          alt="Windows Direct USA Logo" 
+          src={brandSettings?.logo || "https://f005.backblazeb2.com/file/project-starfish/logo/windows+direct+usa+logo+3.png"} 
+          alt={`${brandSettings?.name || 'Windows Direct USA'} Logo`} 
           className="h-16 md:h-20 object-contain"
         />
       </div>
 
       {/* Hero Card */}
-      <div className="bg-gradient-to-br from-brand via-orange-500 to-orange-600 rounded-xl shadow-lg p-8 w-full text-center md:text-left">
-        <h1 className="text-3xl font-bold mb-4 text-white">Welcome to Windows Direct USA</h1>
+      <div 
+        className="rounded-xl shadow-lg p-8 w-full text-center md:text-left"
+        style={{
+          background: brandSettings?.accentColor 
+            ? `linear-gradient(to bottom right, ${brandSettings.accentColor}, ${brandSettings.accentColor}dd, ${brandSettings.accentColor}bb)`
+            : 'linear-gradient(to bottom right, #f97316, #ea580c, #dc2626)'
+        }}
+      >
+        <h1 className="text-3xl font-bold mb-4 text-white">Welcome to {brandSettings?.name || 'Windows Direct USA'}</h1>
         <p className="text-orange-50 mb-6 max-w-2xl mx-auto md:mx-0">
-          Schedule your window consultation appointment with our expert team. 
-          Book your free in-home consultation today and discover premium window solutions.
+          Schedule your basement renovation consultation appointment with our expert team. 
+          Book your free in-home consultation today and discover premium basement renovation solutions.
         </p>
         <div className="flex justify-center md:justify-start">
           <Link to="/new-appointment">

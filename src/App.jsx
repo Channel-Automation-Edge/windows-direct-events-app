@@ -6,6 +6,8 @@ import { DataProvider } from './context/DataContext';
 // Pages
 import Home from './pages/Home';
 import NewAppointment from './pages/NewAppointment';
+import Gallery from './pages/Gallery';
+import ProjectDetail from './pages/ProjectDetail';
 import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 
@@ -49,6 +51,8 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/new-appointment" element={<NewAppointment />} />
+                <Route path="/gallery" element={<Gallery />} />
+                <Route path="/gallery/project/:projectId" element={<ProjectDetail />} />
                 <Route 
                   path="/admin" 
                   element={<Admin isAuth={isAdminAuth} onAuthenticate={setIsAdminAuth} />} 

@@ -2,11 +2,11 @@ import supabase from '../config/supabase';
 
 /**
  * Database service to handle Supabase operations
- * Fetches data from the event_form_app table with id=133075
+ * Fetches data from the contractors table with id=203853
  */
 export const databaseService = {
-  // The ID of our form app in the database
-  FORM_APP_ID: 133075,
+  // The ID of the form app record in the database
+  FORM_APP_ID: 203853,
   
   /**
    * Get the current form app data structure
@@ -15,7 +15,7 @@ export const databaseService = {
    */
   _getCurrentFormData: async () => {
     const { data, error } = await supabase
-      .from('event_form_app')
+      .from('contractors')
       .select('*')
       .eq('id', databaseService.FORM_APP_ID)
       .single();
@@ -32,7 +32,7 @@ export const databaseService = {
    */
   _updateFormData: async (updatedData) => {
     const { data, error } = await supabase
-      .from('event_form_app')
+      .from('contractors')
       .update(updatedData)
       .eq('id', databaseService.FORM_APP_ID)
       .select()
@@ -48,7 +48,7 @@ export const databaseService = {
   getFormData: async () => {
     try {
       const { data, error } = await supabase
-        .from('event_form_app')
+        .from('contractors')
         .select('*')
         .eq('id', databaseService.FORM_APP_ID)
         .single();
@@ -190,7 +190,7 @@ export const databaseService = {
         staffCode = staffCode.charAt(0).toUpperCase() + staffCode.substring(1);
         
         // Ensure ID is unique by checking against existing IDs
-        const existingIds = currentData.staffs.map(staff => staff.id);
+        const existingIds = (currentData.staffs || []).map(staff => staff.id);
         let newId = staffCode;
         let counter = 0;
         
@@ -206,7 +206,7 @@ export const databaseService = {
       }
       
       // Add new staff to the array
-      const updatedStaffs = [...currentData.staffs, newStaff];
+      const updatedStaffs = [...(currentData.staffs || []), newStaff];
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, staffs: updatedStaffs });
@@ -224,7 +224,7 @@ export const databaseService = {
       
       // Find and update the staff member
       let updatedStaff = null;
-      const updatedStaffs = currentData.staffs.map(staff => {
+      const updatedStaffs = (currentData.staffs || []).map(staff => {
         if (staff.id === staffId) {
           updatedStaff = { ...staff, ...updatedFields };
           return updatedStaff;
@@ -247,7 +247,7 @@ export const databaseService = {
       const currentData = await databaseService._getCurrentFormData();
       
       // Remove staff member
-      const updatedStaffs = currentData.staffs.filter(staff => staff.id !== staffId);
+      const updatedStaffs = (currentData.staffs || []).filter(staff => staff.id !== staffId);
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, staffs: updatedStaffs });
@@ -289,7 +289,7 @@ export const databaseService = {
         productCode = productCode.charAt(0).toUpperCase() + productCode.substring(1);
         
         // Ensure ID is unique by checking against existing IDs
-        const existingIds = currentData.products.map(product => product.id);
+        const existingIds = (currentData.products || []).map(product => product.id);
         let newId = productCode;
         let counter = 0;
         
@@ -305,7 +305,7 @@ export const databaseService = {
       }
       
       // Add new product to the array
-      const updatedProducts = [...currentData.products, newProduct];
+      const updatedProducts = [...(currentData.products || []), newProduct];
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, products: updatedProducts });
@@ -323,7 +323,7 @@ export const databaseService = {
       
       // Find and update the product
       let updatedProduct = null;
-      const updatedProducts = currentData.products.map(product => {
+      const updatedProducts = (currentData.products || []).map(product => {
         if (product.id === productId) {
           updatedProduct = { ...product, ...updatedFields };
           return updatedProduct;
@@ -346,7 +346,7 @@ export const databaseService = {
       const currentData = await databaseService._getCurrentFormData();
       
       // Remove product
-      const updatedProducts = currentData.products.filter(product => product.id !== productId);
+      const updatedProducts = (currentData.products || []).filter(product => product.id !== productId);
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, products: updatedProducts });
@@ -439,7 +439,7 @@ export const databaseService = {
       }
       
       // Add new event to the array
-      const updatedEvents = [...currentData.events, newEvent];
+      const updatedEvents = [...(currentData.events || []), newEvent];
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, events: updatedEvents });
@@ -456,7 +456,7 @@ export const databaseService = {
       
       // Find and update the event
       let updatedEvent = null;
-      const updatedEvents = currentData.events.map(event => {
+      const updatedEvents = (currentData.events || []).map(event => {
         if (event.srs_id === srsId) {
           updatedEvent = { ...event, ...updatedFields };
           return updatedEvent;
@@ -478,7 +478,7 @@ export const databaseService = {
       const currentData = await databaseService._getCurrentFormData();
       
       // Remove event
-      const updatedEvents = currentData.events.filter(event => event.srs_id !== srsId);
+      const updatedEvents = (currentData.events || []).filter(event => event.srs_id !== srsId);
       
       // Update the database
       const result = await databaseService._updateFormData({ ...currentData, events: updatedEvents });

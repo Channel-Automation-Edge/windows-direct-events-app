@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/Button';
 import { useAppContext } from '../../context/AppContext';
 import { useDataContext } from '../../context/DataContext';
-import { format, parse, isValid } from 'date-fns';
+import { format, parse, isValid, addDays, startOfDay } from 'date-fns';
 import { Calendar } from '../ui/calendar';
-import { getAuthToken, getForwardLookData, TIME_SLOT_MAPPING, TIME_SLOT_LABELS } from '../../services/leadPerfectionService';
+import { databaseService } from '../../services/databaseService';
 
 const Step3DateTime = ({ onNext, onBack }) => {
   const { formData, updateFormField } = useAppContext();
@@ -18,61 +18,40 @@ const Step3DateTime = ({ onNext, onBack }) => {
   
   // State for calendar and time slots
   const [selectedDate, setSelectedDate] = useState(formData.date ? parseDate(formData.date) : null);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState(formData.timeSlotId || '');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(formData.time || '');
   const [consentChecked, setConsentChecked] = useState(false);
-  const [sweepstakesOnly, setSweepstakesOnly] = useState(formData.sweepstakesOnly || false);
+  const [skipAppointment, setSkipAppointment] = useState(formData.skipAppointment || false);
   
-  // State for API data
+  // State for time slots from database
   const [loading, setLoading] = useState(false);
-  const [authToken, setAuthToken] = useState(null);
-  const [availableDates, setAvailableDates] = useState([]);
-  const [availableSlots, setAvailableSlots] = useState({});
-  const [apiError, setApiError] = useState(null);
+  const [timeSlots, setTimeSlots] = useState({});
+  const [error, setError] = useState(null);
   
-  // Fetch authentication token on component mount
+  // Fetch time slots from database on component mount
   useEffect(() => {
-    const fetchAuthToken = async () => {
-      if (sweepstakesOnly) return; // Skip API calls if sweepstakes only
+    const fetchTimeSlots = async () => {
+      if (skipAppointment) return; // Skip if not scheduling appointment
       
       try {
         setLoading(true);
-        setApiError(null);
-        const token = await getAuthToken();
-        setAuthToken(token);
+        setError(null);
+        const formData = await databaseService.getFormData();
         
-        // After getting token, fetch available time slots
-        fetchAvailableSlots(token);
+        if (formData?.time_slots) {
+          setTimeSlots(formData.time_slots);
+        } else {
+          setError('No time slots available. Please contact customer service.');
+        }
       } catch (error) {
-        console.error('Error authenticating with LeadPerfection:', error);
-        setApiError('Failed to connect to appointment scheduling service. Please try again later.');
+        console.error('Error fetching time slots:', error);
+        setError('Failed to load available time slots. Please try again later.');
+      } finally {
         setLoading(false);
       }
     };
     
-    fetchAuthToken();
-  }, [sweepstakesOnly]);
-  
-  // Function to fetch available time slots using the token
-  const fetchAvailableSlots = async (token) => {
-    try {
-      // Get user's zip code from form data
-      const zipCode = formData.zip || '';
-      
-      // Get product ID if available (optional)
-      const productId = formData.product?.id || null;
-      
-      // Fetch forward look data
-      const forwardLookData = await getForwardLookData(token, zipCode, productId);
-      
-      setAvailableDates(forwardLookData.availableDates);
-      setAvailableSlots(forwardLookData.availableSlots);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching available time slots:', error);
-      setApiError('Failed to retrieve available appointment times. Please try again later.');
-      setLoading(false);
-    }
-  };
+    fetchTimeSlots();
+  }, [skipAppointment]);
 
   // Update time slots when date changes
   const handleDateChange = (date) => {
@@ -86,17 +65,13 @@ const Step3DateTime = ({ onNext, onBack }) => {
       // Clear selected time slot when date changes
       setSelectedTimeSlot('');
       updateFormField('time', '');
-      updateFormField('timeSlotId', '');
     }
   };
 
   // Handle time slot selection
-  const handleTimeSlotSelect = (slotId) => {
-    setSelectedTimeSlot(slotId);
-    
-    // Store both the slot ID and the military time
-    updateFormField('timeSlotId', slotId);
-    updateFormField('time', TIME_SLOT_MAPPING[slotId]);
+  const handleTimeSlotSelect = (timeSlot) => {
+    setSelectedTimeSlot(timeSlot);
+    updateFormField('time', timeSlot);
   };
   
   // Function to convert 24-hour time to 12-hour time format
@@ -114,56 +89,52 @@ const Step3DateTime = ({ onNext, onBack }) => {
     setConsentChecked(e.target.checked);
   };
   
-  // Handle sweepstakes only toggle
-  const handleSweepstakesChange = (e) => {
-    const isChecked = e.target.checked;
-    setSweepstakesOnly(isChecked);
-    updateFormField('sweepstakesOnly', isChecked);
+  // Handle skip appointment toggle
+  const handleSkipAppointmentChange = (isSkipping) => {
+    setSkipAppointment(isSkipping);
+    updateFormField('skipAppointment', isSkipping);
     
-    // If toggling on sweepstakes only, clear date and time
-    if (isChecked) {
+    // If skipping appointment, clear date and time
+    if (isSkipping) {
       setSelectedDate(null);
       setSelectedTimeSlot('');
       updateFormField('date', '');
       updateFormField('time', '');
-      updateFormField('timeSlotId', '');
     } else {
-      // If turning off sweepstakes, fetch the time slots if we have a token
-      if (authToken) {
-        fetchAvailableSlots(authToken);
-      } else {
-        // Re-initialize the auth process if needed
-        const fetchAuthToken = async () => {
-          try {
-            setLoading(true);
-            setApiError(null);
-            const token = await getAuthToken();
-            setAuthToken(token);
-            fetchAvailableSlots(token);
-          } catch (error) {
-            console.error('Error authenticating with LeadPerfection:', error);
-            setApiError('Failed to connect to appointment scheduling service.');
-            setLoading(false);
+      // If scheduling appointment, fetch the time slots from database
+      const fetchTimeSlots = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const formData = await databaseService.getFormData();
+          
+          if (formData?.time_slots) {
+            setTimeSlots(formData.time_slots);
+          } else {
+            setError('No time slots available. Please contact customer service.');
           }
-        };
-        
-        fetchAuthToken();
-      }
+        } catch (error) {
+          console.error('Error fetching time slots:', error);
+          setError('Failed to load available time slots. Please try again later.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchTimeSlots();
     }
   };
   
-  // Validate based on whether sweepstakesOnly is enabled
+  // Validate based on whether appointment is being scheduled
   const handleNext = () => {
-    if (sweepstakesOnly) {
+    if (skipAppointment) {
       if (consentChecked) {
         onNext();
       }
     } else {
-      // Otherwise we need date, time slot ID, and consent
+      // If scheduling appointment, we need date, time slot, and consent
       if (selectedDate && selectedTimeSlot && consentChecked) {
-        // Ensure both timeSlotId and time are set properly
-        updateFormField('timeSlotId', selectedTimeSlot);
-        updateFormField('time', TIME_SLOT_MAPPING[selectedTimeSlot]);
+        updateFormField('time', selectedTimeSlot);
         onNext();
       }
     }
@@ -171,49 +142,76 @@ const Step3DateTime = ({ onNext, onBack }) => {
 
   return (
     <div className="space-y-6 px-2 sm:px-0">
-      <h2 className="text-xl font-semibold mb-4">Date and Time Selection</h2>
+      <h2 className="text-xl font-semibold mb-4">Appointment Scheduling</h2>
       
-      {/* Sweepstakes Only Toggle */}
-      <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="flex h-5 items-center">
-            <input
-              type="checkbox"
-              id="sweepstakes-only"
-              checked={sweepstakesOnly}
-              onChange={handleSweepstakesChange}
-              className="h-4 w-4 rounded border-gray-300 text-brand focus:ring-brand focus:ring-offset-0"
-            />
-          </div>
-          <div>
-            <label htmlFor="sweepstakes-only" className="font-medium text-gray-800">
-              Sweepstakes Entry Only
-            </label>
-            <p className="text-sm text-gray-600">
-              Check this box if you're only interested in entering the sweepstakes without scheduling an appointment.
-            </p>
-          </div>
+      {/* Appointment Options */}
+      <div className="mb-6">
+        <p className="text-gray-700 mb-4">Would you like to schedule an appointment or skip for now?</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => handleSkipAppointmentChange(false)}
+            className={`p-4 rounded-lg border-2 transition-all text-left ${
+              !skipAppointment
+                ? 'border-brand bg-brand/5 text-brand'
+                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                !skipAppointment ? 'border-brand bg-brand' : 'border-gray-300'
+              }`}>
+                {!skipAppointment && <div className="w-2 h-2 bg-white rounded-full"></div>}
+              </div>
+              <div>
+                <h3 className="font-medium">Schedule Appointment</h3>
+                <p className="text-sm text-gray-600">Book a consultation with our team</p>
+              </div>
+            </div>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => handleSkipAppointmentChange(true)}
+            className={`p-4 rounded-lg border-2 transition-all text-left ${
+              skipAppointment
+                ? 'border-brand bg-brand/5 text-brand'
+                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                skipAppointment ? 'border-brand bg-brand' : 'border-gray-300'
+              }`}>
+                {skipAppointment && <div className="w-2 h-2 bg-white rounded-full"></div>}
+              </div>
+              <div>
+                <h3 className="font-medium">Skip for Now</h3>
+                <p className="text-sm text-gray-600">Continue without scheduling</p>
+              </div>
+            </div>
+          </button>
         </div>
       </div>
       
-      {/* Show appointment scheduling or sweepstakes message based on sweepstakesOnly toggle */}
-      {sweepstakesOnly ? (
+      {/* Show appointment scheduling or skip message */}
+      {skipAppointment ? (
         <div className="text-center py-6">
-          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <h3 className="text-green-800 text-lg font-medium">Sweepstakes Entry Only</h3>
-            <p className="text-green-700 mt-1">
-              You've opted for sweepstakes entry without scheduling an appointment.
+          <div className="bg-brand/10 p-4 rounded-lg border border-brand/20">
+            <h3 className="text-brand text-lg font-medium">No Appointment Scheduled</h3>
+            <p className="text-brand/80 mt-1">
+              You can always schedule an appointment later by contacting us directly.
               Click Submit below to continue.
             </p>
           </div>
         </div>
       ) : (
         <div>
-          {/* API Error Message */}
-          {apiError && (
+          {/* Error Message */}
+          {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
               <p className="font-medium">Error</p>
-              <p className="text-sm">{apiError}</p>
+              <p className="text-sm">{error}</p>
             </div>
           )}
           
@@ -234,9 +232,13 @@ const Step3DateTime = ({ onNext, onBack }) => {
                   selected={selectedDate}
                   onSelect={handleDateChange}
                   disabled={(date) => {
-                    // Disable dates not returned by the API
-                    const formattedDate = format(date, 'yyyy-MM-dd');
-                    return !availableDates.includes(formattedDate);
+                    // Disable past dates and weekends if no time slots available
+                    const today = startOfDay(new Date());
+                    if (date < today) return true;
+                    
+                    const dayName = format(date, 'EEEE');
+                    const slotsForDay = timeSlots[dayName] || [];
+                    return slotsForDay.length === 0;
                   }}
                   initialFocus
                   className="rounded-xl"
@@ -254,23 +256,23 @@ const Step3DateTime = ({ onNext, onBack }) => {
             {selectedDate ? (
               // Check if we have time slots for the selected date
               (() => {
-                const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-                const slotsForDate = availableSlots[formattedDate] || [];
+                const dayName = format(selectedDate, 'EEEE');
+                const slotsForDay = timeSlots[dayName] || [];
                 
-                return slotsForDate.length > 0 ? (
+                return slotsForDay.length > 0 ? (
                   <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:justify-center gap-3 max-w-md mx-auto">
-                    {slotsForDate.map((slotId) => (
+                    {slotsForDay.map((timeSlot) => (
                       <button
-                        key={slotId}
+                        key={timeSlot}
                         type="button"
                         className={`py-3 px-4 text-sm font-medium rounded-md border transition-all ${
-                          selectedTimeSlot === slotId 
+                          selectedTimeSlot === timeSlot 
                             ? 'bg-brand text-white border-brand hover:bg-brand/90' 
                             : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-50'
                         }`}
-                        onClick={() => handleTimeSlotSelect(slotId)}
+                        onClick={() => handleTimeSlotSelect(timeSlot)}
                       >
-                        {TIME_SLOT_LABELS[slotId]}
+                        {convertTo12HourFormat(timeSlot)}
                       </button>
                     ))}
                   </div>
@@ -282,7 +284,7 @@ const Step3DateTime = ({ onNext, onBack }) => {
               })()
             ) : (
               <div className="text-center text-gray-600 py-4">
-                {availableDates.length > 0 ? 
+                {Object.keys(timeSlots).length > 0 ? 
                   "Please select an available date to view time slots." : 
                   "No available appointment dates found. Please try again later or contact customer service."}
               </div>
@@ -305,7 +307,7 @@ const Step3DateTime = ({ onNext, onBack }) => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-600 leading-relaxed">
-              By checking this box, I authorize Windows Direct USA to send me marketing calls and text messages at the number provided above, including by using an autodialer or a prerecorded message. I understand that I am not required to give this authorization as a condition of doing business with Windows Direct USA. By checking this box, I am also agreeing to Windows Direct USA's Terms of Use and Privacy Policy.
+              By checking this box, I authorize this company to send me marketing calls and text messages at the number provided above, including by using an autodialer or a prerecorded message. I understand that I am not required to give this authorization as a condition of doing business with this company. By checking this box, I am also agreeing to the company's Terms of Use and Privacy Policy.
             </p>
           </div>
         </div>
@@ -322,8 +324,8 @@ const Step3DateTime = ({ onNext, onBack }) => {
         </Button>
         <Button 
           onClick={handleNext}
-          disabled={(sweepstakesOnly ? !consentChecked : (!selectedDate || !selectedTimeSlot || !consentChecked))}
-          className={`gap-2 ${(sweepstakesOnly ? !consentChecked : (!selectedDate || !selectedTimeSlot || !consentChecked)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={(skipAppointment ? !consentChecked : (!selectedDate || !selectedTimeSlot || !consentChecked))}
+          className={`gap-2 ${(skipAppointment ? !consentChecked : (!selectedDate || !selectedTimeSlot || !consentChecked)) ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Submit
         </Button>
