@@ -487,6 +487,73 @@ export const databaseService = {
       console.error('Error deleting event:', error);
       return { success: false, error: error.message };
     }
+  },
+
+  /*
+   * Bulk operations for events
+   */
+  bulkReplaceEvents: async (newEvents) => {
+    try {
+      console.log('bulkReplaceEvents: Starting with', newEvents.length, 'events');
+      // Get current data
+      const currentData = await databaseService._getCurrentFormData();
+      console.log('bulkReplaceEvents: Got current data');
+      
+      // Validate new events structure
+      // Replace all events with new events
+      const result = await databaseService._updateFormData({ 
+        ...currentData, 
+        events: newEvents 
+      });
+      
+      console.log('bulkReplaceEvents: _updateFormData result:', result);
+      
+      // _updateFormData returns the updated data directly, not a success object
+      if (result) {
+        return { 
+          success: true, 
+          message: `Successfully replaced all events with ${newEvents.length} new events` 
+        };
+      } else {
+        return { success: false, error: 'Failed to update database' };
+      }
+    } catch (error) {
+      console.error('Error bulk replacing events:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /*
+   * Bulk operations for staff
+   */
+  bulkReplaceStaffs: async (newStaffs) => {
+    try {
+      console.log('bulkReplaceStaffs: Starting with', newStaffs.length, 'staff');
+      // Get current data
+      const currentData = await databaseService._getCurrentFormData();
+      console.log('bulkReplaceStaffs: Got current data');
+      
+      // Replace all staffs with new staffs
+      const result = await databaseService._updateFormData({ 
+        ...currentData, 
+        staffs: newStaffs 
+      });
+      
+      console.log('bulkReplaceStaffs: _updateFormData result:', result);
+      
+      // _updateFormData returns the updated data directly, not a success object
+      if (result) {
+        return { 
+          success: true, 
+          message: `Successfully replaced all staff with ${newStaffs.length} new staff members` 
+        };
+      } else {
+        return { success: false, error: 'Failed to update database' };
+      }
+    } catch (error) {
+      console.error('Error bulk replacing staff:', error);
+      return { success: false, error: error.message };
+    }
   }
 };
 

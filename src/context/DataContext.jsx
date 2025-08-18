@@ -225,6 +225,27 @@ export const DataProvider = ({ children }) => {
     }
     return result;
   };
+
+  // Bulk replace all events
+  const bulkReplaceEvents = async (newEvents) => {
+    const result = await databaseService.bulkReplaceEvents(newEvents);
+    if (result.success) {
+      // Update local state with new events
+      setEvents(newEvents);
+      setActiveEvents(newEvents.filter(event => event.active));
+    }
+    return result;
+  };
+
+  // Bulk replace all staff
+  const bulkReplaceStaffs = async (newStaffs) => {
+    const result = await databaseService.bulkReplaceStaffs(newStaffs);
+    if (result.success) {
+      // Update local state with new staff
+      setStaffs(newStaffs);
+    }
+    return result;
+  };
   
   // The value to be provided by the context
   const contextValue = {
@@ -245,24 +266,14 @@ export const DataProvider = ({ children }) => {
     loadAllData,
     
     // CRUD for staffs
-    addStaff,
-    updateStaff,
-    deleteStaff,
-    
-    // CRUD for products
-    addProduct,
-    updateProduct,
-    deleteProduct,
+    addStaff, updateStaff, deleteStaff,
+    addProduct, updateProduct, deleteProduct,
+    addEvent, updateEvent, deleteEvent, bulkReplaceEvents, bulkReplaceStaffs,
     
     // CRUD for appointment types
     addAppointmentType,
     updateAppointmentType,
-    deleteAppointmentType,
-    
-    // CRUD for events
-    addEvent,
-    updateEvent,
-    deleteEvent
+    deleteAppointmentType
   };
 
   return (

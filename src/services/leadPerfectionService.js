@@ -259,10 +259,10 @@ export const formatAppointmentForLeadPerfection = (formData) => {
     productID: formData.product?.id || '',
     email: formData.email || '',
     srs_id: formData.event?.srs_id || '',
-    pro_id: formData.staff?.id || '',
+    pro_id: formData.staff?.id ? parseInt(formData.staff.id, 10) : 0,
     apptdate,
     appttime,
-    sender: 362
+    sender: 'Channel Automation'
     
   };
 

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
-import { LogOut, Lock, User, LogIn, Edit, Calendar, Users, Package, Clock, FileText, Plus, Trash2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { User, Lock, Plus, Edit, Trash2, CheckCircle2, Calendar, Users, Package, MapPin, Upload, X, LogIn, LogOut } from 'lucide-react';
 import { useDataContext } from '../context/DataContext';
 import StaffForm from '../components/admin/StaffForm';
 import ProductForm from '../components/admin/ProductForm';
 // AppointmentType form import removed
 import EventForm from '../components/admin/EventForm';
+import EventsCSVUpload from '../components/admin/EventsCSVUpload';
+import StaffCSVUpload from '../components/admin/StaffCSVUpload';
 import DeleteConfirmDialog from '../components/ui/DeleteConfirmDialog';
 import { BGPattern } from '../components/ui/BGPattern';
 
@@ -28,7 +30,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     // CRUD operations
     addStaff, updateStaff, deleteStaff,
     addProduct, updateProduct, deleteProduct,
-    addEvent, updateEvent, deleteEvent
+    addEvent, updateEvent, deleteEvent, bulkReplaceEvents, bulkReplaceStaffs
   } = useDataContext();
   
   // State for modals
@@ -47,6 +49,155 @@ const Admin = ({ isAuth, onAuthenticate }) => {
   
   // Alert state for success/error messages
   const [alert, setAlert] = useState(null); // { type: 'success' | 'error', message: string }
+  
+  // State for CSV upload
+  const [csvUploading, setCsvUploading] = useState(false);
+  const [csvDialogOpen, setCsvDialogOpen] = useState(false);
+  const [staffCsvUploading, setStaffCsvUploading] = useState(false);
+  const [staffCsvDialogOpen, setStaffCsvDialogOpen] = useState(false);
+  
+  // State for events pagination
+  const [eventsCurrentPage, setEventsCurrentPage] = useState(1);
+  const eventsPerPage = 10;
+
+  // State for staff pagination
+  const [staffCurrentPage, setStaffCurrentPage] = useState(1);
+  const staffPerPage = 8;
+
+  // Sort and paginate events
+  const getSortedAndPaginatedEvents = () => {
+    if (!events || events.length === 0) return { paginatedEvents: [], totalPages: 0 };
+    
+    // Sort events: active first, then alphabetically by name
+    const sortedEvents = [...events].sort((a, b) => {
+      // First priority: active events at top
+      if (a.active !== b.active) {
+        return b.active - a.active; // true (1) comes before false (0)
+      }
+      // Second priority: alphabetical by name
+      return a.name.localeCompare(b.name);
+    });
+    
+    // Calculate pagination
+    const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
+    const startIndex = (eventsCurrentPage - 1) * eventsPerPage;
+    const endIndex = startIndex + eventsPerPage;
+    const paginatedEvents = sortedEvents.slice(startIndex, endIndex);
+    
+    return { paginatedEvents, totalPages, totalEvents: sortedEvents.length };
+  };
+
+  // Sort and paginate staff
+  const getSortedAndPaginatedStaff = () => {
+    if (!staffs || staffs.length === 0) return { paginatedStaff: [], totalPages: 0 };
+    
+    // Sort staff alphabetically by name
+    const sortedStaff = [...staffs].sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+    
+    // Calculate pagination
+    const totalPages = Math.ceil(sortedStaff.length / staffPerPage);
+    const startIndex = (staffCurrentPage - 1) * staffPerPage;
+    const endIndex = startIndex + staffPerPage;
+    const paginatedStaff = sortedStaff.slice(startIndex, endIndex);
+    
+    return { paginatedStaff, totalPages, totalStaff: sortedStaff.length };
+  };
+
+  // Handle CSV upload for bulk event replacement
+  const handleCSVUpload = async (newEvents, resetUploadComponent) => {
+    console.log('handleCSVUpload: Starting upload with', newEvents.length, 'events');
+    setCsvUploading(true);
+    try {
+      const result = await bulkReplaceEvents(newEvents);
+      console.log('handleCSVUpload: bulkReplaceEvents result:', result);
+      
+      if (result.success) {
+        console.log('handleCSVUpload: Upload successful, setting alert');
+        setAlert({
+          type: 'success',
+          message: result.message || `Successfully uploaded ${newEvents.length} events`
+        });
+        // Reset pagination to first page after upload
+        setEventsCurrentPage(1);
+        // Reset the upload component
+        if (resetUploadComponent) {
+          resetUploadComponent();
+        }
+        // Close the CSV dialog after successful upload
+        setCsvDialogOpen(false);
+        // Refresh data like delete does
+        console.log('handleCSVUpload: Setting dataFetched to false to trigger refresh');
+        setDataFetched(false);
+      } else {
+        console.log('handleCSVUpload: Upload failed:', result.error);
+        setAlert({
+          type: 'error',
+          message: result.error || 'Failed to upload events'
+        });
+        // Close dialog even on error
+        setCsvDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('handleCSVUpload: Exception occurred:', error);
+      setAlert({
+        type: 'error',
+        message: 'An unexpected error occurred while uploading events'
+      });
+      // Close dialog even on error
+      setCsvDialogOpen(false);
+    } finally {
+      console.log('handleCSVUpload: Finished, setting csvUploading to false');
+      setCsvUploading(false);
+    }
+  };
+
+  // Handle CSV upload for bulk staff replacement
+  const handleStaffCSVUpload = async (newStaffs, resetUploadComponent) => {
+    console.log('handleStaffCSVUpload: Starting upload with', newStaffs.length, 'staff');
+    setStaffCsvUploading(true);
+    try {
+      const result = await bulkReplaceStaffs(newStaffs);
+      console.log('handleStaffCSVUpload: bulkReplaceStaffs result:', result);
+      
+      if (result.success) {
+        console.log('handleStaffCSVUpload: Upload successful, setting alert');
+        setAlert({
+          type: 'success',
+          message: result.message || `Successfully uploaded ${newStaffs.length} staff members`
+        });
+        // Reset the upload component
+        if (resetUploadComponent) {
+          resetUploadComponent();
+        }
+        // Close the CSV dialog after successful upload
+        setStaffCsvDialogOpen(false);
+        // Refresh data like delete does
+        console.log('handleStaffCSVUpload: Setting dataFetched to false to trigger refresh');
+        setDataFetched(false);
+      } else {
+        console.log('handleStaffCSVUpload: Upload failed:', result.error);
+        setAlert({
+          type: 'error',
+          message: result.error || 'Failed to upload staff'
+        });
+        // Close dialog even on error
+        setStaffCsvDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('handleStaffCSVUpload: Exception occurred:', error);
+      setAlert({
+        type: 'error',
+        message: 'An unexpected error occurred while uploading staff'
+      });
+      // Close dialog even on error
+      setStaffCsvDialogOpen(false);
+    } finally {
+      console.log('handleStaffCSVUpload: Finished, setting staffCsvUploading to false');
+      setStaffCsvUploading(false);
+    }
+  };
   
   // Refresh data only when authentication state changes from false to true
   // or when the user explicitly requests a refresh through the Try Again button
@@ -259,6 +410,42 @@ const Admin = ({ isAuth, onAuthenticate }) => {
     return (
       <div className="relative max-w-6xl mx-auto py-6 px-4">
         <BGPattern variant="grid" mask="fade-edges" size={24} fill="#e5e7eb" />
+        
+        {/* Enhanced Success Banner */}
+        {alert && alert.type === 'success' && (
+          <div className="fixed top-0 left-0 right-0 z-[10000] bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg animate-in slide-in-from-top duration-300">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 sm:pl-20 md:pl-24 py-3 sm:py-4">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1 ml-3 sm:ml-4 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center">
+                    <p className="text-white font-semibold text-sm">Success!</p>
+                    <div className="hidden sm:block sm:ml-2 w-1 h-1 bg-white/60 rounded-full"></div>
+                    <p className="text-white/90 text-xs sm:text-sm sm:ml-2 truncate">{alert.message}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setAlert(null)}
+                  className="flex-shrink-0 ml-2 sm:ml-4 p-1.5 sm:p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200 group"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {/* Animated progress bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+              <div className="h-full bg-white/40 animate-pulse"></div>
+            </div>
+          </div>
+        )}
+        
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <Button 
@@ -275,35 +462,49 @@ const Admin = ({ isAuth, onAuthenticate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           
           {/* Events Card */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full flex flex-col">
             <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
               <h2 className="font-semibold text-gray-800 flex items-center gap-2">
                 <Calendar size={18} className="text-brand" />
                 Events
               </h2>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={() => openModal('event')}
-              >
-                <Plus size={16} />
-                <span className="sr-only">Add Event</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setCsvDialogOpen(true)}
+                  title="Bulk Upload Events"
+                >
+                  <Upload size={16} />
+                  <span className="sr-only">Bulk Upload Events</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => openModal('event')}
+                >
+                  <Plus size={16} />
+                  <span className="sr-only">Add Event</span>
+                </Button>
+              </div>
             </div>
-            <div className="p-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+            <div className="flex-1 overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 table-fixed">
                 <thead>
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SRS ID</th>
+                    <th className="w-20 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SRS ID</th>
                     <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="w-24 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="w-20 px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {events && events.length > 0 ? (
-                    events.map(event => (
+                  {(() => {
+                    const { paginatedEvents, totalPages, totalEvents } = getSortedAndPaginatedEvents();
+                    return paginatedEvents.length > 0 ? (
+                      paginatedEvents.map(event => (
                       <tr key={event.srs_id}>
                         <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{event.srs_id}</td>
                         <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{event.name}</td>
@@ -331,40 +532,91 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                           </div>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className="px-3 py-6 text-center text-gray-500 italic">
-                        No events found
-                      </td>
-                    </tr>
-                  )}
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="px-3 py-6 text-center text-gray-500 italic">
+                          No events found
+                        </td>
+                      </tr>
+                    );
+                  })()}
                 </tbody>
               </table>
             </div>
+            
+            {/* Pagination Controls */}
+            {(() => {
+              const { totalPages, totalEvents } = getSortedAndPaginatedEvents();
+              return totalPages > 1 && (
+                <div className="px-4 py-3 bg-gray-50 border-t flex items-center justify-between mt-auto">
+                  <div className="flex items-center text-sm text-gray-700">
+                    <span>
+                      Showing {((eventsCurrentPage - 1) * eventsPerPage) + 1} to {Math.min(eventsCurrentPage * eventsPerPage, totalEvents)} of {totalEvents} events
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEventsCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={eventsCurrentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-700">
+                      Page {eventsCurrentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEventsCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={eventsCurrentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
+
           {/* Staff Card */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-1 md:col-span-1 lg:col-span-1">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-1 md:col-span-1 lg:col-span-1 flex flex-col">
             <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
               <h2 className="font-semibold text-gray-800 flex items-center gap-2">
                 <Users size={18} className="text-brand" />
                 Staff Members
               </h2>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={() => openModal('staff')}
-              >
-                <Plus size={16} />
-                <span className="sr-only">Add Staff</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setStaffCsvDialogOpen(true)}
+                  title="Bulk Upload Staff"
+                >
+                  <Upload size={16} />
+                  <span className="sr-only">Bulk Upload Staff</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => openModal('staff')}
+                >
+                  <Plus size={16} />
+                  <span className="sr-only">Add Staff</span>
+                </Button>
+              </div>
             </div>
-            <div className="p-4">
+            <div className="flex-1 p-4">
               <ul className="divide-y divide-gray-200">
-                {staffs && staffs.length > 0 ? (
-                  staffs.map(staff => (
+                {(() => {
+                  const { paginatedStaff } = getSortedAndPaginatedStaff();
+                  return paginatedStaff && paginatedStaff.length > 0 ? (
+                    paginatedStaff.map(staff => (
                     <li key={staff.id} className="py-3 flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-gray-800 font-medium">{staff.name}</span>
@@ -388,11 +640,46 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                       </div>
                     </li>
                   ))
-                ) : (
-                  <li className="py-3 text-gray-500 italic">No staff members found</li>
-                )}
+                  ) : (
+                    <li className="py-3 text-gray-500 italic">No staff members found</li>
+                  );
+                })()}
               </ul>
             </div>
+            {/* Staff Pagination */}
+            {(() => {
+              const { totalPages, totalStaff } = getSortedAndPaginatedStaff();
+              return totalPages > 1 && (
+                <div className="px-4 py-3 bg-gray-50 border-t flex items-center justify-between mt-auto">
+                  <div className="flex items-center text-sm text-gray-700">
+                    <span>
+                      Showing {((staffCurrentPage - 1) * staffPerPage) + 1} to {Math.min(staffCurrentPage * staffPerPage, totalStaff)} of {totalStaff} staff
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setStaffCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={staffCurrentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-700">
+                      Page {staffCurrentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setStaffCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={staffCurrentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Products Card */}
@@ -495,6 +782,70 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           itemName={deleteDialog.name}
           isDeleting={deleteDialog.isDeleting}
         />
+
+        {/* CSV Upload Dialog */}
+        {csvDialogOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] p-4">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
+              <div className="flex items-center justify-between p-4 border-b">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 bg-orange-100 rounded-full flex-shrink-0">
+                    <Upload className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+                    Bulk Upload Events
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setCsvDialogOpen(false)}
+                  disabled={csvUploading}
+                  className="text-gray-500 hover:text-gray-700 disabled:opacity-50 flex-shrink-0 p-1"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-4">
+                <EventsCSVUpload 
+                  onUpload={handleCSVUpload}
+                  loading={csvUploading}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Staff CSV Upload Dialog */}
+        {staffCsvDialogOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] p-4">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
+              <div className="flex items-center justify-between p-4 border-b">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 bg-orange-100 rounded-full flex-shrink-0">
+                    <Users className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+                    Bulk Upload Staff
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setStaffCsvDialogOpen(false)}
+                  disabled={staffCsvUploading}
+                  className="text-gray-500 hover:text-gray-700 disabled:opacity-50 flex-shrink-0 p-1"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-4">
+                <StaffCSVUpload 
+                  onUpload={handleStaffCSVUpload}
+                  loading={staffCsvUploading}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
