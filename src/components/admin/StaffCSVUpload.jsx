@@ -23,10 +23,10 @@ const StaffCSVUpload = ({ onUpload, loading = false }) => {
       const idIndex = headers.findIndex(h => h.toLowerCase() === 'id');
       const firstNameIndex = headers.findIndex(h => h.toLowerCase() === 'firstname');
       const activeIndex = headers.findIndex(h => h.toLowerCase() === 'active');
-      const salesRepIndex = headers.findIndex(h => h.toLowerCase() === 'salesrep');
+      const promoterIndex = headers.findIndex(h => h.toLowerCase() === 'promoter');
 
-      if (idIndex === -1 || firstNameIndex === -1 || activeIndex === -1 || salesRepIndex === -1) {
-        throw new Error('CSV must contain columns: id, FirstName, Active, SalesRep');
+      if (idIndex === -1 || firstNameIndex === -1 || activeIndex === -1 || promoterIndex === -1) {
+        throw new Error('CSV must contain columns: id, FirstName, Active, Promoter');
       }
 
       // Parse data rows
@@ -44,10 +44,10 @@ const StaffCSVUpload = ({ onUpload, loading = false }) => {
         const id = row[idIndex];
         const firstName = row[firstNameIndex];
         const active = row[activeIndex];
-        const salesRep = row[salesRepIndex];
+        const promoter = row[promoterIndex];
 
-        // Filter: only include if Active = TRUE and SalesRep = TRUE
-        if (active.toUpperCase() === 'TRUE' && salesRep.toUpperCase() === 'TRUE') {
+        // Filter: only include if Active = TRUE and Promoter = TRUE
+        if (active.toUpperCase() === 'TRUE' && promoter.toUpperCase() === 'TRUE') {
           // Validate required fields
           if (!id || !firstName) {
             skippedRows.push(`Row ${i + 1}: Missing required fields (id or FirstName)`);
@@ -60,12 +60,12 @@ const StaffCSVUpload = ({ onUpload, loading = false }) => {
             active: true
           });
         } else {
-          skippedRows.push(`Row ${i + 1}: ${firstName || 'Unknown'} (Active=${active}, SalesRep=${salesRep})`);
+          skippedRows.push(`Row ${i + 1}: ${firstName || 'Unknown'} (Active=${active}, Promoter=${promoter})`);
         }
       }
 
       if (staffData.length === 0) {
-        throw new Error('No valid staff found. Make sure Active=TRUE and SalesRep=TRUE for staff to be imported.');
+        throw new Error('No valid staff found. Make sure Active=TRUE and Promoter=TRUE for staff to be imported.');
       }
 
       return {
@@ -169,7 +169,7 @@ const StaffCSVUpload = ({ onUpload, loading = false }) => {
           Drag and drop your CSV file here, or click to select
         </p>
         <p className="text-sm text-gray-500 mb-4">
-          CSV must contain: id, FirstName, Active, SalesRep columns
+          CSV must contain: id, FirstName, Active, Promoter columns
         </p>
         <input
           type="file"
@@ -254,7 +254,7 @@ const StaffCSVUpload = ({ onUpload, loading = false }) => {
         </div>
         <p className="text-sm text-yellow-700">
           This will completely replace all existing staff with the staff from your CSV file.
-          Only staff with Active=TRUE and SalesRep=TRUE will be imported.
+          Only staff with Active=TRUE and Promoter=TRUE will be imported.
           Make sure to backup your current staff before proceeding.
         </p>
       </div>
