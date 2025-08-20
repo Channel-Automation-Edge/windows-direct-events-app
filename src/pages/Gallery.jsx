@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button';
 import { BGPattern } from '../components/ui/BGPattern';
 import { databaseService } from '../services/databaseService';
 import { getBrandSettings } from '../utils/brandStorage';
-import { Play, Calendar, ArrowRight, FolderOpen, Video, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Calendar, ArrowRight, FolderOpen, Video, RefreshCw, ChevronLeft, ChevronRight, Camera } from 'lucide-react';
 import { ImageComparisonSlider } from '../components/ui/ImageComparisonSlider';
 
 const Gallery = () => {
@@ -48,7 +48,8 @@ const Gallery = () => {
   const tabs = [
     { id: 'past-projects', label: 'Past Projects', icon: FolderOpen },
     { id: 'videos', label: 'Videos', icon: Video },
-    { id: 'before-after', label: 'Before & After', icon: RefreshCw }
+    { id: 'before-after', label: 'Before & After', icon: RefreshCw },
+    { id: 'photos', label: 'Photos', icon: Camera }
   ];
 
   const renderPagination = () => {
@@ -156,6 +157,7 @@ const Gallery = () => {
         )}
         {activeTab === 'videos' && <VideosTab data={galleryData?.videos} />}
         {activeTab === 'before-after' && <BeforeAfterTab data={galleryData?.beforeAfter} />}
+        {activeTab === 'photos' && <PhotosTab data={galleryData?.pastProjects} />}
       </div>
     </div>
   );
@@ -229,8 +231,8 @@ const PastProjectsTab = ({ data, currentPage, projectsPerPage }) => {
 // Project Card Component
 const ProjectCard = ({ project }) => {
   return (
-    <Link to={`/gallery/project/${project.id}`} className="group block">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <Link to={`/gallery/project/${project.id}`} className="group block h-full">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
         <div className="aspect-video overflow-hidden">
           <img
             src={project.featured_image}
@@ -238,8 +240,8 @@ const ProjectCard = ({ project }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
-        <div className="p-6">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="p-6 flex-1 flex flex-col">
+          <div className="flex items-center gap-2 mb-2 min-h-[28px]">
             {project.tags.map((tag) => (
               <span
                 key={tag}
@@ -256,10 +258,10 @@ const ProjectCard = ({ project }) => {
             </div>
             <span className="font-medium">{project.project_year}</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand transition-colors flex-1">
             {project.name}
           </h3>
-          <div className="flex items-center text-brand text-sm font-medium">
+          <div className="flex items-center text-brand text-sm font-medium mt-auto">
             View Project <ArrowRight size={16} className="ml-1" />
           </div>
         </div>
@@ -271,6 +273,25 @@ const ProjectCard = ({ project }) => {
 // Videos Tab Component
 const VideosTab = ({ data }) => {
   const [selectedVideo, setSelectedVideo] = useState(null);
+
+  // Function to convert YouTube URL to embed format
+  const getEmbedUrl = (url) => {
+    if (!url) return '';
+    
+    // If already an embed URL, return as is
+    if (url.includes('/embed/')) return url;
+    
+    // Extract video ID from various YouTube URL formats
+    let videoId = null;
+    if (url.includes('youtube.com/watch?v=')) {
+      videoId = url.split('watch?v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0];
+    }
+    
+    // Return embed URL if video ID found
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+  };
 
   if (!data || data.length === 0) {
     return (
@@ -314,7 +335,7 @@ const VideosTab = ({ data }) => {
             </div>
             <div className="aspect-video">
               <iframe
-                src={selectedVideo.url}
+                src={getEmbedUrl(selectedVideo.url)}
                 title={selectedVideo.title}
                 className="w-full h-full"
                 frameBorder="0"
@@ -485,6 +506,106 @@ const BeforeAfterSlider = ({ item }) => {
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
         <p className="text-gray-600 text-sm">{item.description}</p>
+      </div>
+    </div>
+  );
+};
+
+// Photos Tab Component
+const PhotosTab = ({ data }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">No photos available at the moment.</p>
+      </div>
+    );
+  }
+
+  // Extract all photos from past projects (featured images and gallery images)
+  const allPhotos = [];
+  data.forEach((project) => {
+    // Add featured image
+    if (project.featured_image) {
+      allPhotos.push({
+        id: `${project.id}-featured`,
+        url: project.featured_image,
+        title: `${project.name} - Featured`,
+        projectName: project.name,
+        projectYear: project.project_year
+      });
+    }
+    
+    // Add gallery images if they exist
+    if (project.gallery_images && Array.isArray(project.gallery_images)) {
+      project.gallery_images.forEach((image, index) => {
+        allPhotos.push({
+          id: `${project.id}-gallery-${index}`,
+          url: image,
+          title: `${project.name} - Photo ${index + 1}`,
+          projectName: project.name,
+          projectYear: project.project_year
+        });
+      });
+    }
+  });
+
+  // Show first 3 photos, then CTA, then remaining photos
+  const firstThreePhotos = allPhotos.slice(0, 3);
+  const remainingPhotos = allPhotos.slice(3);
+
+  return (
+    <div className="space-y-12">
+      {/* First 3 Photos */}
+      {firstThreePhotos.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Latest Photos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {firstThreePhotos.map((photo) => (
+              <PhotoCard key={photo.id} photo={photo} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
+        <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
+        <p className="text-white/90 mb-6 max-w-2xl mx-auto">
+          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+        </p>
+        <Link to="/new-appointment">
+          <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
+            <Calendar size={18} />
+            Get Started Today
+          </Button>
+        </Link>
+      </div>
+
+      {/* Remaining Photos */}
+      {remainingPhotos.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Photos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {remainingPhotos.map((photo) => (
+              <PhotoCard key={photo.id} photo={photo} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Photo Card Component
+const PhotoCard = ({ photo }) => {
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div className="aspect-video overflow-hidden">
+        <img
+          src={photo.url}
+          alt={photo.title}
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+        />
       </div>
     </div>
   );

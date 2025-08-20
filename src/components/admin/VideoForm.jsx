@@ -8,8 +8,7 @@ const VideoForm = ({ video, onClose, onSuccess }) => {
     title: '',
     url: '',
     thumbnail: '',
-    description: '',
-    uploadDate: ''
+    description: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,30 +61,10 @@ const VideoForm = ({ video, onClose, onSuccess }) => {
       if (response.ok) {
         const data = await response.json();
         
-        // Try to fetch upload date using a public API (RSS feed approach)
-        let uploadDate = '';
-        try {
-          // Use a CORS proxy to fetch YouTube page and extract upload date
-          const pageResponse = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`);
-          if (pageResponse.ok) {
-            const pageData = await pageResponse.json();
-            const pageContent = pageData.contents;
-            
-            // Extract upload date from page content using regex
-            const dateMatch = pageContent.match(/"uploadDate":"([^"]+)"/);
-            if (dateMatch) {
-              uploadDate = new Date(dateMatch[1]).toISOString().split('T')[0]; // Format as YYYY-MM-DD
-            }
-          }
-        } catch (dateError) {
-          console.log('Could not fetch upload date:', dateError);
-        }
-        
         setFormData(prev => ({
           ...prev,
-          title: prev.title.trim() === '' ? data.title : prev.title, // Only update if title is empty
-          thumbnail: prev.thumbnail.trim() === '' ? thumbnailUrl : prev.thumbnail, // Only update if thumbnail is empty
-          uploadDate: prev.uploadDate.trim() === '' ? uploadDate : prev.uploadDate // Only update if upload date is empty
+          title: prev.title.trim() === '' ? data.title : prev.title,
+          thumbnail: prev.thumbnail.trim() === '' ? thumbnailUrl : prev.thumbnail
         }));
       } else {
         // If oEmbed fails, just set the thumbnail
@@ -166,6 +145,25 @@ const VideoForm = ({ video, onClose, onSuccess }) => {
           )}
 
           <div>
+            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+              YouTube URL *
+            </label>
+            <input
+              type="url"
+              id="url"
+              name="url"
+              value={formData.url}
+              onChange={handleChange}
+              required
+              placeholder="https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Supports YouTube URLs (embed, watch, or short links) - title and thumbnail will auto-populate
+            </p>
+          </div>
+
+          <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
               Title *
             </label>
@@ -179,25 +177,6 @@ const VideoForm = ({ video, onClose, onSuccess }) => {
               placeholder="Enter video title (auto-populated from YouTube URL)"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
             />
-          </div>
-
-          <div>
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-              YouTube Embed URL *
-            </label>
-            <input
-              type="url"
-              id="url"
-              name="url"
-              value={formData.url}
-              onChange={handleChange}
-              required
-              placeholder="https://www.youtube.com/embed/VIDEO_ID"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Supports YouTube URLs (embed, watch, or short links) - title and thumbnail will auto-populate
-            </p>
           </div>
 
           <div>
@@ -225,27 +204,11 @@ const VideoForm = ({ video, onClose, onSuccess }) => {
               value={formData.description}
               onChange={handleChange}
               required
-              rows={3}
+              rows={5}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
             />
           </div>
 
-          <div>
-            <label htmlFor="uploadDate" className="block text-sm font-medium text-gray-700 mb-1">
-              YouTube Upload Date
-            </label>
-            <input
-              type="date"
-              id="uploadDate"
-              name="uploadDate"
-              value={formData.uploadDate}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Auto-populated from YouTube URL when possible, or enter manually
-            </p>
-          </div>
 
           <div className="flex justify-end gap-3 pt-4">
             <Button

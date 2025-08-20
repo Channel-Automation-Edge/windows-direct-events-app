@@ -11,8 +11,7 @@ const ProjectForm = ({ project, onClose, onSuccess }) => {
     description: '',
     featured_image: '',
     project_photos: [''],
-    completion_date: '',
-    project_duration: ''
+    project_year: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -145,37 +144,22 @@ const ProjectForm = ({ project, onClose, onSuccess }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="completion_date" className="block text-sm font-medium text-gray-700 mb-1">
-                Completion Date *
-              </label>
-              <input
-                type="date"
-                id="completion_date"
-                name="completion_date"
-                value={formData.completion_date}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="project_duration" className="block text-sm font-medium text-gray-700 mb-1">
-                Project Duration *
-              </label>
-              <input
-                type="text"
-                id="project_duration"
-                name="project_duration"
-                value={formData.project_duration}
-                onChange={handleChange}
-                required
-                placeholder="e.g., 2 weeks"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
-              />
-            </div>
+          <div>
+            <label htmlFor="project_year" className="block text-sm font-medium text-gray-700 mb-1">
+              Completion Year *
+            </label>
+            <input
+              type="number"
+              id="project_year"
+              name="project_year"
+              value={formData.project_year}
+              onChange={handleChange}
+              required
+              min="2000"
+              max="2030"
+              placeholder="2025"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
+            />
           </div>
 
           <div>

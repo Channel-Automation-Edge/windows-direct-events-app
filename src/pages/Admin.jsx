@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/Button';
 import { User, Lock, Plus, Edit, Trash2, CheckCircle2, Calendar, Users, Package, MapPin, Upload, X, LogIn, LogOut, Image, Video, RefreshCw, FolderOpen } from 'lucide-react';
+import SearchInput from '../components/ui/SearchInput';
 import { useDataContext } from '../context/DataContext';
 import StaffForm from '../components/admin/StaffForm';
 import ProductForm from '../components/admin/ProductForm';
@@ -76,14 +77,183 @@ const Admin = ({ isAuth, onAuthenticate }) => {
 
   // State for staff pagination
   const [staffCurrentPage, setStaffCurrentPage] = useState(1);
+  
+  // Search states
+  const [searchQueries, setSearchQueries] = useState({
+    events: '',
+    staff: '',
+    videos: '',
+    beforeAfter: '',
+    pastProjects: ''
+  });
   const staffPerPage = 8;
+
+  // Gallery pagination states
+  const [galleryPagination, setGalleryPagination] = useState({
+    videos: { currentPage: 1, itemsPerPage: 10 },
+    beforeAfter: { currentPage: 1, itemsPerPage: 10 },
+    pastProjects: { currentPage: 1, itemsPerPage: 10 }
+  });
+
+  // Gallery sorting states
+  const [gallerySorting, setGallerySorting] = useState({
+    videos: 'title_asc',
+    beforeAfter: 'title_asc',
+    pastProjects: 'name_asc'
+  });
+
+  // Search query handler
+  const handleSearchChange = (section, query) => {
+    setSearchQueries(prev => ({ ...prev, [section]: query }));
+    // Reset pagination when searching
+    if (section === 'events') setEventsCurrentPage(1);
+    if (section === 'staff') setStaffCurrentPage(1);
+    if (['videos', 'beforeAfter', 'pastProjects'].includes(section)) {
+      setGalleryPagination(prev => ({
+        ...prev,
+        [section]: { ...prev[section], currentPage: 1 }
+      }));
+    }
+  };
+
+  // Gallery pagination handler
+  const handleGalleryPageChange = (section, page) => {
+    setGalleryPagination(prev => ({
+      ...prev,
+      [section]: { ...prev[section], currentPage: page }
+    }));
+  };
+
+  // Gallery sorting handler
+  const handleGallerySortChange = (section, sortValue) => {
+    setGallerySorting(prev => ({ ...prev, [section]: sortValue }));
+    // Reset to first page when sorting changes
+    setGalleryPagination(prev => ({
+      ...prev,
+      [section]: { ...prev[section], currentPage: 1 }
+    }));
+  };
+
+  // Filter functions
+  const filterEvents = (events, query) => {
+    if (!query.trim()) return events;
+    const lowerQuery = query.toLowerCase();
+    return events.filter(event => 
+      event.name?.toLowerCase().includes(lowerQuery) ||
+      event.srs_id?.toLowerCase().includes(lowerQuery) ||
+      event.address?.toLowerCase().includes(lowerQuery) ||
+      event.city?.toLowerCase().includes(lowerQuery)
+    );
+  };
+
+  const filterStaff = (staff, query) => {
+    if (!query.trim()) return staff;
+    const lowerQuery = query.toLowerCase();
+    return staff.filter(person => 
+      person.name?.toLowerCase().includes(lowerQuery) ||
+      person.email?.toLowerCase().includes(lowerQuery) ||
+      person.phone?.toLowerCase().includes(lowerQuery) ||
+      person.employee_id?.toString().toLowerCase().includes(lowerQuery)
+    );
+  };
+
+  const filterGalleryItems = (items, query) => {
+    if (!query.trim()) return items;
+    const lowerQuery = query.toLowerCase();
+    return items.filter(item => 
+      item.title?.toLowerCase().includes(lowerQuery) ||
+      item.description?.toLowerCase().includes(lowerQuery) ||
+      item.name?.toLowerCase().includes(lowerQuery)
+    );
+  };
+
+  const sortGalleryItems = (items, sortValue) => {
+    const [field, direction] = sortValue.split('_');
+    const sorted = [...items].sort((a, b) => {
+      let aValue = a[field];
+      let bValue = b[field];
+      
+      // Handle date fields
+      if (field === 'uploadDate' || field === 'createdAt') {
+        aValue = aValue ? new Date(aValue) : new Date(0);
+        bValue = bValue ? new Date(bValue) : new Date(0);
+      }
+      
+      // Handle string fields
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
+    return sorted;
+  };
+
+  const getPaginatedGalleryItems = (section, allItems) => {
+    const query = searchQueries[section];
+    const sortValue = gallerySorting[section];
+    const { currentPage, itemsPerPage } = galleryPagination[section];
+    
+    // Filter and sort
+    const filtered = filterGalleryItems(allItems, query);
+    const sorted = sortGalleryItems(filtered, sortValue);
+    
+    // Paginate
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedItems = sorted.slice(startIndex, endIndex);
+    
+    return {
+      items: paginatedItems,
+      totalItems: sorted.length,
+      totalPages: Math.ceil(sorted.length / itemsPerPage)
+    };
+  };
+
+  const getSortOptions = (section) => {
+    const commonOptions = [
+      { value: 'title_asc', label: 'Title A-Z', direction: 'asc' },
+      { value: 'title_desc', label: 'Title Z-A', direction: 'desc' }
+    ];
+    
+    switch (section) {
+      case 'videos':
+        return [
+          ...commonOptions,
+          { value: 'createdAt_desc', label: 'Recently Added', direction: 'desc' },
+          { value: 'createdAt_asc', label: 'Oldest Added', direction: 'asc' }
+        ];
+      case 'beforeAfter':
+        return [
+          ...commonOptions,
+          { value: 'createdAt_desc', label: 'Recently Added', direction: 'desc' },
+          { value: 'createdAt_asc', label: 'Oldest Added', direction: 'asc' }
+        ];
+      case 'pastProjects':
+        return [
+          { value: 'name_asc', label: 'Name A-Z', direction: 'asc' },
+          { value: 'name_desc', label: 'Name Z-A', direction: 'desc' },
+          { value: 'project_year_desc', label: 'Newest Year', direction: 'desc' },
+          { value: 'project_year_asc', label: 'Oldest Year', direction: 'asc' }
+        ];
+      default:
+        return commonOptions;
+    }
+  };
 
   // Sort and paginate events
   const getSortedAndPaginatedEvents = () => {
     if (!events || events.length === 0) return { paginatedEvents: [], totalPages: 0 };
     
+    // Filter events first
+    const filteredEvents = filterEvents(events, searchQueries.events);
+    
     // Sort events: active first, then alphabetically by name
-    const sortedEvents = [...events].sort((a, b) => {
+    const sortedEvents = [...filteredEvents].sort((a, b) => {
       // First priority: active events at top
       if (a.active !== b.active) {
         return b.active - a.active; // true (1) comes before false (0)
@@ -105,8 +275,11 @@ const Admin = ({ isAuth, onAuthenticate }) => {
   const getSortedAndPaginatedStaff = () => {
     if (!staffs || staffs.length === 0) return { paginatedStaff: [], totalPages: 0 };
     
+    // Filter staff first
+    const filteredStaff = filterStaff(staffs, searchQueries.staff);
+    
     // Sort staff alphabetically by name
-    const sortedStaff = [...staffs].sort((a, b) => {
+    const sortedStaff = [...filteredStaff].sort((a, b) => {
       return a.name.localeCompare(b.name);
     });
     
@@ -559,12 +732,13 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           
           {/* Events Card */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-full flex flex-col">
-            <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Calendar size={18} className="text-brand" />
-                Events
-              </h2>
-              <div className="flex items-center gap-2">
+            <div className="bg-orange-50 px-4 py-3 border-b">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <Calendar size={18} className="text-brand" />
+                  Events
+                </h2>
+                <div className="flex items-center gap-2">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -584,7 +758,14 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                   <Plus size={16} />
                   <span className="sr-only">Add Event</span>
                 </Button>
+                </div>
               </div>
+              <SearchInput
+                value={searchQueries.events}
+                onChange={(query) => handleSearchChange('events', query)}
+                placeholder="Search events by name, SRS ID, address, or city..."
+                className="w-full"
+              />
             </div>
             <div className="flex-1 overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 table-fixed">
@@ -680,12 +861,13 @@ const Admin = ({ isAuth, onAuthenticate }) => {
 
           {/* Staff Card */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden col-span-1 md:col-span-1 lg:col-span-1 flex flex-col">
-            <div className="bg-orange-50 px-4 py-3 border-b flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Users size={18} className="text-brand" />
-                Staff Members
-              </h2>
-              <div className="flex items-center gap-2">
+            <div className="bg-orange-50 px-4 py-3 border-b">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <Users size={18} className="text-brand" />
+                  Staff Members
+                </h2>
+                <div className="flex items-center gap-2">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -705,7 +887,14 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                   <Plus size={16} />
                   <span className="sr-only">Add Staff</span>
                 </Button>
+                </div>
               </div>
+              <SearchInput
+                value={searchQueries.staff}
+                onChange={(query) => handleSearchChange('staff', query)}
+                placeholder="Search staff by name, email, phone, or employee ID..."
+                className="w-full"
+              />
             </div>
             <div className="flex-1 p-4">
               <ul className="divide-y divide-gray-200">
@@ -884,84 +1073,130 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                 </div>
 
                 {/* Gallery Content */}
-                {activeGalleryTab === 'videos' && (
-                  <GallerySection
-                    title="Videos"
-                    items={galleryData.videos || []}
-                    onAdd={() => openModal('video')}
-                    onEdit={(item) => openModal('video', item)}
-                    onDelete={(item) => handleDelete('video', item.id, item.title)}
-                    renderItem={(video) => (
-                      <div className="flex items-center gap-4">
-                        <img 
-                          src={video.thumbnail} 
-                          alt={video.title}
-                          className="w-16 h-12 object-cover rounded flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 truncate">{video.title}</h4>
-                          {video.uploadDate && (
-                            <p className="text-sm text-gray-500">Uploaded: {video.uploadDate}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  />
-                )}
-
-                {activeGalleryTab === 'beforeAfter' && (
-                  <GallerySection
-                    title="Before & After"
-                    items={galleryData.beforeAfter || []}
-                    onAdd={() => openModal('beforeAfter')}
-                    onEdit={(item) => openModal('beforeAfter', item)}
-                    onDelete={(item) => handleDelete('beforeAfter', item.id, item.title)}
-                    renderItem={(item) => (
-                      <div className="flex items-center gap-4">
-                        <div className="flex gap-2">
+                {activeGalleryTab === 'videos' && (() => {
+                  const { items, totalItems, totalPages } = getPaginatedGalleryItems('videos', galleryData.videos || []);
+                  const { currentPage, itemsPerPage } = galleryPagination.videos;
+                  
+                  return (
+                    <GallerySection
+                      title="Videos"
+                      items={items}
+                      onAdd={() => openModal('video')}
+                      onEdit={(item) => openModal('video', item)}
+                      onDelete={(item) => handleDelete('video', item.id, item.title)}
+                      searchValue={searchQueries.videos}
+                      onSearchChange={(query) => handleSearchChange('videos', query)}
+                      searchPlaceholder="Search videos by title or description..."
+                      sortValue={gallerySorting.videos}
+                      onSortChange={(sortValue) => handleGallerySortChange('videos', sortValue)}
+                      sortOptions={getSortOptions('videos')}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={(page) => handleGalleryPageChange('videos', page)}
+                      itemsPerPage={itemsPerPage}
+                      totalItems={totalItems}
+                      renderItem={(video) => (
+                        <div className="flex items-center gap-4">
                           <img 
-                            src={item.beforeImage} 
-                            alt={`${item.title} - Before`}
-                            className="w-12 h-12 object-cover rounded"
+                            src={video.thumbnail} 
+                            alt={video.title}
+                            className="w-16 h-12 object-cover rounded flex-shrink-0"
                           />
-                          <img 
-                            src={item.afterImage} 
-                            alt={`${item.title} - After`}
-                            className="w-12 h-12 object-cover rounded"
-                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-900 truncate">{video.title}</h4>
+                            <p className="text-sm text-gray-500 truncate">{video.description}</p>
+                          </div>
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{item.title}</h4>
-                          <p className="text-sm text-gray-500 truncate">{item.description}</p>
-                        </div>
-                      </div>
-                    )}
-                  />
-                )}
+                      )}
+                    />
+                  );
+                })()}
 
-                {activeGalleryTab === 'pastProjects' && (
-                  <GallerySection
-                    title="Past Projects"
-                    items={galleryData.pastProjects || []}
-                    onAdd={() => openModal('project')}
-                    onEdit={(item) => openModal('project', item)}
-                    onDelete={(item) => handleDelete('project', item.id, item.name)}
-                    renderItem={(project) => (
-                      <div className="flex items-center gap-4">
-                        <img 
-                          src={project.featured_image} 
-                          alt={project.name}
-                          className="w-16 h-12 object-cover rounded"
-                        />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{project.name}</h4>
-                          <p className="text-sm text-gray-500">{project.address}</p>
-                          <p className="text-xs text-gray-400">{project.completion_date}</p>
+                {activeGalleryTab === 'beforeAfter' && (() => {
+                  const { items, totalItems, totalPages } = getPaginatedGalleryItems('beforeAfter', galleryData.beforeAfter || []);
+                  const { currentPage, itemsPerPage } = galleryPagination.beforeAfter;
+                  
+                  return (
+                    <GallerySection
+                      title="Before & After"
+                      items={items}
+                      onAdd={() => openModal('beforeAfter')}
+                      onEdit={(item) => openModal('beforeAfter', item)}
+                      onDelete={(item) => handleDelete('beforeAfter', item.id, item.title)}
+                      searchValue={searchQueries.beforeAfter}
+                      onSearchChange={(query) => handleSearchChange('beforeAfter', query)}
+                      searchPlaceholder="Search before & after by title or description..."
+                      sortValue={gallerySorting.beforeAfter}
+                      onSortChange={(sortValue) => handleGallerySortChange('beforeAfter', sortValue)}
+                      sortOptions={getSortOptions('beforeAfter')}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={(page) => handleGalleryPageChange('beforeAfter', page)}
+                      itemsPerPage={itemsPerPage}
+                      totalItems={totalItems}
+                      renderItem={(item) => (
+                        <div className="flex items-center gap-4">
+                          <div className="flex gap-2">
+                            <img 
+                              src={item.beforeImage} 
+                              alt={`${item.title} - Before`}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                            <img 
+                              src={item.afterImage} 
+                              alt={`${item.title} - After`}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{item.title}</h4>
+                            <p className="text-sm text-gray-500 truncate">{item.description}</p>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  />
-                )}
+                      )}
+                    />
+                  );
+                })()}
+
+                {activeGalleryTab === 'pastProjects' && (() => {
+                  const { items, totalItems, totalPages } = getPaginatedGalleryItems('pastProjects', galleryData.pastProjects || []);
+                  const { currentPage, itemsPerPage } = galleryPagination.pastProjects;
+                  
+                  return (
+                    <GallerySection
+                      title="Past Projects"
+                      items={items}
+                      onAdd={() => openModal('project')}
+                      onEdit={(item) => openModal('project', item)}
+                      onDelete={(item) => handleDelete('project', item.id, item.name)}
+                      searchValue={searchQueries.pastProjects}
+                      onSearchChange={(query) => handleSearchChange('pastProjects', query)}
+                      searchPlaceholder="Search past projects by name or description..."
+                      sortValue={gallerySorting.pastProjects}
+                      onSortChange={(sortValue) => handleGallerySortChange('pastProjects', sortValue)}
+                      sortOptions={getSortOptions('pastProjects')}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={(page) => handleGalleryPageChange('pastProjects', page)}
+                      itemsPerPage={itemsPerPage}
+                      totalItems={totalItems}
+                      renderItem={(project) => (
+                        <div className="flex items-center gap-4">
+                          <img 
+                            src={project.featured_image} 
+                            alt={project.name}
+                            className="w-16 h-12 object-cover rounded"
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{project.name}</h4>
+                            <p className="text-sm text-gray-500">{project.address}</p>
+                            <p className="text-xs text-gray-400">{project.project_year}</p>
+                          </div>
+                        </div>
+                      )}
+                    />
+                  );
+                })()}
               </div>
             )}
           </div>

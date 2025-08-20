@@ -146,7 +146,7 @@ const Step3DateTime = ({ onNext, onBack }) => {
       
       {/* Appointment Options */}
       <div className="mb-6">
-        <p className="text-gray-700 mb-4">Would you like to schedule an appointment or skip for now?</p>
+        <p className="text-gray-700 mb-4">Would you like to schedule an appointment or enter our sweepstakes?</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
             type="button"
@@ -186,22 +186,23 @@ const Step3DateTime = ({ onNext, onBack }) => {
                 {skipAppointment && <div className="w-2 h-2 bg-white rounded-full"></div>}
               </div>
               <div>
-                <h3 className="font-medium">Skip for Now</h3>
-                <p className="text-sm text-gray-600">Continue without scheduling</p>
+                <h3 className="font-medium">Enter Sweepstakes</h3>
+                <p className="text-sm text-gray-600">Skip appointment and enter to win</p>
               </div>
             </div>
           </button>
         </div>
       </div>
       
-      {/* Show appointment scheduling or skip message */}
+      {/* Show appointment scheduling or sweepstakes message */}
       {skipAppointment ? (
         <div className="text-center py-6">
           <div className="bg-brand/10 p-4 rounded-lg border border-brand/20">
-            <h3 className="text-brand text-lg font-medium">No Appointment Scheduled</h3>
+            <h3 className="text-brand text-lg font-medium">🎉 Sweepstakes Entry</h3>
             <p className="text-brand/80 mt-1">
+              You're entered to win! We'll contact you if you're selected as a winner.
               You can always schedule an appointment later by contacting us directly.
-              Click Submit below to continue.
+              Click Submit below to complete your entry.
             </p>
           </div>
         </div>
