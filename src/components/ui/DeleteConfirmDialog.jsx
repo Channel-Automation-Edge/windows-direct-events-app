@@ -20,7 +20,7 @@ const DeleteConfirmDialog = ({
             <div className="p-2 bg-red-100 rounded-full">
               <AlertTriangle className="h-5 w-5 text-red-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-800">
               {title}
             </h2>
           </div>
@@ -41,7 +41,7 @@ const DeleteConfirmDialog = ({
           {itemName && (
             <div className="bg-gray-50 p-3 rounded-md mb-4">
               <p className="text-sm text-gray-600">Item to be deleted:</p>
-              <p className="font-medium text-gray-900">{itemName}</p>
+              <p className="font-medium text-gray-800">{itemName}</p>
             </div>
           )}
 

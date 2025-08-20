@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button';
 import { useDataContext } from '../context/DataContext';
 import { BGPattern } from '../components/ui/BGPattern';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
-import { Calendar, TrendingUp, Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar, FolderOpen, RefreshCw, Video, Play, Camera, ArrowRight } from 'lucide-react';
 import { databaseService } from '../services/databaseService';
 import { getBrandSettings } from '../utils/brandStorage';
 
@@ -37,6 +37,7 @@ const Home = () => {
   const [activeEventsCount, setActiveEventsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [brandSettings, setBrandSettings] = useState(null);
+  const [galleryData, setGalleryData] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,6 +48,10 @@ const Home = () => {
         
         const events = await databaseService.getEvents(true); // Get only active events
         setActiveEventsCount(events.length);
+
+        // Get gallery data for video thumbnail
+        const formData = await databaseService.getFormData();
+        setGalleryData(formData?.other_custom_content?.gallery || null);
       } catch (error) {
         console.error('Error fetching data:', error);
         setActiveEventsCount(0);
@@ -57,6 +62,37 @@ const Home = () => {
 
     fetchData();
   }, []);
+
+  // Helper function to extract video ID from YouTube URL
+  const extractVideoId = (url) => {
+    if (!url) return null;
+    
+    if (url.includes('youtube.com/embed/')) {
+      return url.split('/embed/')[1]?.split('?')[0];
+    } else if (url.includes('youtube.com/watch?v=')) {
+      return url.split('watch?v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+      return url.split('youtu.be/')[1]?.split('?')[0];
+    }
+    
+    return null;
+  };
+
+  // Get first video thumbnail
+  const getFirstVideoThumbnail = () => {
+    if (!galleryData?.videos || galleryData.videos.length === 0) {
+      return "https://img.youtube.com/vi/zLEO9-GhJ5c/maxresdefault.jpg"; // fallback
+    }
+    
+    const firstVideo = galleryData.videos[0];
+    const videoId = extractVideoId(firstVideo.url);
+    
+    if (videoId) {
+      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+    
+    return firstVideo.thumbnail || "https://img.youtube.com/vi/zLEO9-GhJ5c/maxresdefault.jpg";
+  };
 
   return (
     <div className="relative space-y-6">
@@ -96,82 +132,194 @@ const Home = () => {
 
       
 
-      {/* Enhanced Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Active Events Card */}
+      {/* Gallery Preview Section */}
+      <div className="space-y-8 py-4 md:py-8">
+        {/* Section Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="group relative overflow-hidden bg-gradient-to-br from-white via-blue-50 to-blue-100 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100/50"
+          className="text-left"
         >
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-brand/10 to-transparent rounded-bl-full"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-brand/10 rounded-lg">
-                  <CalendarIcon className="w-5 h-5 text-brand" />
-                </div>
-                <h2 className="text-lg font-semibold text-gray-800">Active Events</h2>
-              </div>
-            </div>
-            <div className="mb-3">
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 border-3 border-brand/30 border-t-brand rounded-full animate-spin"></div>
-                  <span className="text-2xl font-bold text-gray-400">Loading...</span>
-                </div>
-              ) : (
-                <motion.p 
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.8 }}
-                  className="text-4xl font-bold text-brand"
-                >
-                  <AnimatedCounter value={activeEventsCount} duration={2.5} />
-                </motion.p>
-              )}
-            </div>
-            <p className="text-sm text-gray-600 font-medium">Currently active</p>
-            <div className="absolute bottom-2 right-2 opacity-20 group-hover:opacity-30 transition-opacity">
-              <TrendingUp className="w-8 h-8 text-brand" />
-            </div>
+          <div>
+            <h2 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">
+              Our Work Showcase
+            </h2>
+            <div className="h-1 w-24 bg-gradient-to-r from-brand via-brand to-transparent mb-6 rounded-full"></div>
           </div>
+          <p className="text-base md:text-lg text-gray-600">
+            Discover the quality and craftsmanship that sets us apart. Browse our portfolio of successful basement renovations.
+          </p>
         </motion.div>
-        
-        {/* Total Appointments Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="group relative overflow-hidden bg-gradient-to-br from-white via-orange-50 to-orange-100 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100/50"
-        >
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-500/10 to-transparent rounded-bl-full"></div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500/10 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-brand" />
+
+        {/* Gallery Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Featured Project */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Featured Project */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <Link to="/gallery?tab=past-projects" className="group block">
+                <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200">
+                    <img
+                      src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800"
+                      alt="Featured basement renovation project"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent group-hover:from-brand/60 transition-all duration-500"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-3 py-1 bg-brand text-white text-sm font-medium rounded-full">
+                        Featured Project
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Complete Basement Transformation</h3>
+                    <p className="text-white/90 text-sm">Modern renovation with premium finishes and lighting</p>
+                  </div>
                 </div>
-                <h2 className="text-lg font-semibold text-gray-800">Total Appointments</h2>
-              </div>
-            </div>
-            <div className="mb-3">
-              <motion.p 
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.0 }}
-                className="text-4xl font-bold text-brand"
+              </Link>
+            </motion.div>
+
+            {/* Bottom Row - Get Started & Photos Gallery Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* New Appointment Card */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
               >
-                <AnimatedCounter value={156} duration={3} />
-              </motion.p>
-            </div>
-            <p className="text-sm text-gray-600 font-medium">This month</p>
-            <div className="absolute bottom-2 right-2 opacity-20 group-hover:opacity-30 transition-opacity">
-              <CalendarIcon className="w-8 h-8 text-brand" />
+                <Link to="/new-appointment" className="group block">
+                  <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
+                      <img
+                        src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400"
+                        alt="Schedule consultation"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-brand/60 transition-all duration-500"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Calendar size={16} className="text-white" />
+                        <span className="text-white text-sm font-medium">Get Started</span>
+                      </div>
+                      <p className="text-white/90 text-xs">Schedule your consultation</p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+
+              {/* Photos Gallery Card */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+              >
+                <Link to="/gallery?tab=photos" className="group block">
+                  <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
+                      <img
+                        src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400"
+                        alt="Photo gallery preview"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-brand/60 transition-all duration-500"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Camera size={16} className="text-white" />
+                        <span className="text-white text-sm font-medium">Photo Gallery</span>
+                      </div>
+                      <p className="text-white/90 text-xs">Browse our project photos</p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
             </div>
           </div>
-        </motion.div>
+
+          {/* Gallery Highlights */}
+          <div className="space-y-6">
+            {/* Before & After Preview */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <Link to="/gallery?tab=before-after" className="group block">
+                <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                  <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
+                    <img
+                      src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400"
+                      alt="Before and after transformation"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-brand/60 transition-all duration-500"></div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <RefreshCw size={16} className="text-white" />
+                      <span className="text-white text-sm font-medium">Before & After</span>
+                    </div>
+                    <p className="text-white/90 text-xs">See dramatic transformations</p>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Video Gallery Preview */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              <Link to="/gallery?tab=videos" className="group block">
+                <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
+                  <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
+                    <img
+                      src={getFirstVideoThumbnail()}
+                      alt="Video gallery preview"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-brand/60 transition-all duration-500">
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-100">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 group-hover:bg-white/30 transition-all duration-300">
+                        <Play size={24} className="text-white ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Video size={16} className="text-white" />
+                      <span className="text-white text-sm font-medium">Video Gallery</span>
+                    </div>
+                    <p className="text-white/90 text-xs">Watch our work in action</p>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+
+            {/* Explore Full Gallery Button */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="text-left"
+            >
+              <Link to="/gallery" className="group inline-flex items-center gap-2 text-brand hover:text-brand/80 transition-colors duration-300">
+                <span className="text-lg font-semibold">Explore Full Gallery</span>
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

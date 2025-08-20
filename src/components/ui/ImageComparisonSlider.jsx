@@ -117,7 +117,7 @@ const ImageComparisonSlider = React.forwardRef(
           
           {/* Handle */}
           <div
-            className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-12 w-12 flex items-center justify-center rounded-full bg-white/50 text-gray-900 shadow-xl backdrop-blur-md transition-all duration-300 ease-in-out group-hover:scale-105 ${
+            className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-12 w-12 flex items-center justify-center rounded-full bg-white/50 text-gray-800 shadow-xl backdrop-blur-md transition-all duration-300 ease-in-out group-hover:scale-105 ${
               isDragging ? 'scale-105 shadow-2xl shadow-brand/50' : ''
             }`}
             role="slider"

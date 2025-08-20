@@ -92,7 +92,7 @@ const ProjectForm = ({ project, onClose, onSuccess }) => {
             <div className="p-2 bg-brand/10 rounded-full">
               <FolderOpen className="h-5 w-5 text-brand" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-800">
               {project ? 'Edit Project' : 'Add New Project'}
             </h2>
           </div>

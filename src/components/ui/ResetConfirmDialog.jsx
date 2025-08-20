@@ -19,7 +19,7 @@ const ResetConfirmDialog = ({
             <div className="p-2 bg-orange-100 rounded-full">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-800">
               {title}
             </h2>
           </div>

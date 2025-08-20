@@ -18,7 +18,7 @@ const SuccessDialog = ({
             <div className="p-2 bg-green-100 rounded-full">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-800">
               {title}
             </h2>
           </div>

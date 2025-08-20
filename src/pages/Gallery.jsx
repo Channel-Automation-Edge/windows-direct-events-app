@@ -115,16 +115,18 @@ const Gallery = () => {
   return (
     <div className="relative space-y-8">
       <BGPattern variant="grid" mask="fade-edges" size={24} fill="#e5e7eb" />
-      
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Work Gallery</h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Explore our portfolio of successful basement renovation projects. 
-          See the quality and craftsmanship that sets us apart.
-        </p>
-      </div>
-
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Our Work Gallery</h1>
+          <div className="flex justify-center">
+            <div className="h-1 w-24 bg-gradient-to-r from-brand via-brand to-transparent mb-6 rounded-full"></div>
+          </div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Explore our portfolio of successful basement renovation projects. 
+            See the quality and craftsmanship that sets us apart.
+          </p>
+        </div>
+      
       {/* Navigation Tabs */}
       <div className="flex justify-center">
         <div className="bg-white rounded-lg p-1 shadow-md border border-gray-200">
@@ -136,7 +138,7 @@ const Gallery = () => {
                 className={`px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   activeTab === tab.id
                     ? 'bg-brand text-white shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                 }`}
               >
                 <tab.icon size={16} />
@@ -190,7 +192,7 @@ const PastProjectsTab = ({ data, currentPage, projectsPerPage }) => {
       {/* 3 Newest Projects */}
       {newestProjects.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Our Latest Projects</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Our Latest Projects</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {newestProjects.map((project) => (
               <ProjectCard key={project.id} project={project} />
@@ -216,7 +218,7 @@ const PastProjectsTab = ({ data, currentPage, projectsPerPage }) => {
       {/* Remaining Projects */}
       {remainingProjects.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Projects</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">More Projects</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentRemainingProjects.map((project) => (
               <ProjectCard key={project.id} project={project} />
@@ -258,7 +260,7 @@ const ProjectCard = ({ project }) => {
             </div>
             <span className="font-medium">{project.project_year}</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-brand transition-colors flex-1">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-brand transition-colors flex-1">
             {project.name}
           </h3>
           <div className="flex items-center text-brand text-sm font-medium mt-auto">
@@ -352,7 +354,7 @@ const VideosTab = ({ data }) => {
       {/* 3 Newest Videos */}
       {newestVideos.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Latest Videos</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Latest Videos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {newestVideos.map((video) => (
               <VideoCard
@@ -382,7 +384,7 @@ const VideosTab = ({ data }) => {
       {/* Remaining Videos */}
       {remainingVideos.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Videos</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">More Videos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {remainingVideos.map((video) => (
               <VideoCard
@@ -415,7 +417,7 @@ const VideoCard = ({ video, onPlay }) => {
         </div>
       </div>
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{video.title}</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">{video.title}</h3>
         <p className="text-gray-600 text-sm">{video.description}</p>
       </div>
     </div>
@@ -444,7 +446,7 @@ const BeforeAfterTab = ({ data }) => {
       {/* 2 Newest Items */}
       {newestItems.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Latest Transformations</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Latest Transformations</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {newestItems.map((item) => (
               <BeforeAfterSlider key={item.id} item={item} />
@@ -470,7 +472,7 @@ const BeforeAfterTab = ({ data }) => {
       {/* Remaining Items */}
       {remainingItems.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Transformations</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">More Transformations</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {remainingItems.map((item) => (
               <BeforeAfterSlider key={item.id} item={item} />
@@ -504,7 +506,7 @@ const BeforeAfterSlider = ({ item }) => {
         </div>
       </div>
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">{item.title}</h3>
         <p className="text-gray-600 text-sm">{item.description}</p>
       </div>
     </div>
@@ -558,7 +560,7 @@ const PhotosTab = ({ data }) => {
       {/* First 3 Photos */}
       {firstThreePhotos.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Latest Photos</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Latest Photos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {firstThreePhotos.map((photo) => (
               <PhotoCard key={photo.id} photo={photo} />
@@ -584,7 +586,7 @@ const PhotosTab = ({ data }) => {
       {/* Remaining Photos */}
       {remainingPhotos.length > 0 && (
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">More Photos</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">More Photos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {remainingPhotos.map((photo) => (
               <PhotoCard key={photo.id} photo={photo} />

@@ -783,7 +783,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                     return paginatedEvents.length > 0 ? (
                       paginatedEvents.map(event => (
                       <tr key={event.srs_id}>
-                        <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{event.srs_id}</td>
+                        <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-800">{event.srs_id}</td>
                         <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-500">{event.name}</td>
                         <td className="px-3 py-3 whitespace-nowrap text-sm">
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${event.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
@@ -1017,7 +1017,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                         </div>
                       </div>
                       <div className="p-3 text-center">
-                        <h3 className="font-medium text-gray-900 text-sm">{product.name}</h3>
+                        <h3 className="font-medium text-gray-800 text-sm">{product.name}</h3>
                         <p className="text-xs text-gray-500 mt-1">ID: {product.id}</p>
                       </div>
                     </div>
@@ -1059,7 +1059,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                         className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                           activeGalleryTab === tab.id
                             ? 'bg-white text-brand shadow-sm'
-                            : 'text-gray-600 hover:text-gray-900'
+                            : 'text-gray-600 hover:text-gray-800'
                         }`}
                       >
                         <tab.icon size={16} />
@@ -1103,8 +1103,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                             className="w-16 h-12 object-cover rounded flex-shrink-0"
                           />
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 truncate">{video.title}</h4>
-                            <p className="text-sm text-gray-500 truncate">{video.description}</p>
+                            <h4 className="font-medium text-gray-800 truncate">{video.title}</h4>
                           </div>
                         </div>
                       )}
@@ -1149,7 +1148,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                             />
                           </div>
                           <div className="flex-1">
-                            <h4 className="font-medium text-gray-900">{item.title}</h4>
+                            <h4 className="font-medium text-gray-800">{item.title}</h4>
                             <p className="text-sm text-gray-500 truncate">{item.description}</p>
                           </div>
                         </div>
@@ -1188,7 +1187,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                             className="w-16 h-12 object-cover rounded"
                           />
                           <div className="flex-1">
-                            <h4 className="font-medium text-gray-900">{project.name}</h4>
+                            <h4 className="font-medium text-gray-800">{project.name}</h4>
                             <p className="text-sm text-gray-500">{project.address}</p>
                             <p className="text-xs text-gray-400">{project.project_year}</p>
                           </div>
@@ -1271,7 +1270,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                   <div className="p-2 bg-orange-100 rounded-full flex-shrink-0">
                     <Upload className="h-5 w-5 text-orange-600" />
                   </div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800 truncate">
                     Bulk Upload Events
                   </h2>
                 </div>
@@ -1303,7 +1302,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
                   <div className="p-2 bg-orange-100 rounded-full flex-shrink-0">
                     <Users className="h-5 w-5 text-orange-600" />
                   </div>
-                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800 truncate">
                     Bulk Upload Staff
                   </h2>
                 </div>

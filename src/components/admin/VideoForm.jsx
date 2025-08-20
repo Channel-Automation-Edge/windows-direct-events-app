@@ -125,7 +125,7 @@ const VideoForm = ({ video, onClose, onSuccess }) => {
             <div className="p-2 bg-brand/10 rounded-full">
               <Video className="h-5 w-5 text-brand" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-800">
               {video ? 'Edit Video' : 'Add New Video'}
             </h2>
           </div>

@@ -45,7 +45,7 @@ const ProjectDetail = () => {
   if (!project) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Project Not Found</h1>
         <p className="text-gray-600 mb-6">The project you're looking for doesn't exist or has been removed.</p>
         <Link to="/gallery?tab=past-projects">
           <Button variant="secondary" className="gap-2">
@@ -71,7 +71,7 @@ const ProjectDetail = () => {
           Past Projects
         </Link>
         <span>/</span>
-        <span className="text-gray-900">{project.name}</span>
+        <span className="text-gray-800">{project.name}</span>
       </nav>
 
       {/* Header */}
@@ -88,7 +88,7 @@ const ProjectDetail = () => {
               </span>
             ))}
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{project.name}</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">{project.name}</h1>
           <div className="flex flex-wrap items-center gap-6 text-gray-600">
             <div className="flex items-center gap-2">
               <MapPin size={18} />
@@ -147,17 +147,17 @@ const ProjectDetail = () => {
       {/* Project Description */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 h-fit">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Project Overview</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Overview</h2>
           <p className="text-gray-700 leading-relaxed text-lg">{project.description}</p>
         </div>
 
         {/* Project Details */}
         <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 h-fit">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Details</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Project Details</h3>
           <div className="space-y-3">
             <div>
               <span className="text-sm font-medium text-gray-500">Location</span>
-              <p className="text-gray-900">{project.address}</p>
+              <p className="text-gray-800">{project.address}</p>
             </div>
             <div>
               <span className="text-sm font-medium text-gray-500">Project Type</span>
@@ -191,7 +191,7 @@ const ProjectDetail = () => {
 
       {/* Related Projects CTA */}
       <div className="bg-gray-50 rounded-xl p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Explore More Projects</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Explore More Projects</h2>
         <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
           Discover more of our successful basement renovation projects to get inspired for your own home transformation.
         </p>

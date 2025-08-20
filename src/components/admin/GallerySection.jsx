@@ -27,7 +27,7 @@ const GallerySection = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+        <h3 className="text-lg font-medium text-gray-800">{title}</h3>
         <Button
           onClick={onAdd}
           className="flex items-center gap-2 bg-brand hover:bg-brand/90"

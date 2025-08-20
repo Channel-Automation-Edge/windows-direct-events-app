@@ -5,8 +5,8 @@ export function buttonVariants({ variant = 'default', size = 'default', classNam
   const variants = {
     default: 'bg-brand text-white hover:bg-brand/90',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-    outline: 'border border-gray-200 bg-white hover:bg-gray-100 hover:text-gray-900',
-    ghost: 'hover:bg-gray-100 hover:text-gray-900',
+    outline: 'border border-gray-200 bg-white hover:bg-gray-100 hover:text-gray-800',
+    ghost: 'hover:bg-gray-100 hover:text-gray-800',
   };
 
   const sizes = {
