@@ -63,10 +63,13 @@ export function AppProvider({ children }) {
     setFormData(initialFormData);
   };
 
-  // Submit the form and send to LeadPerfection API only
+  // Submit the form (LeadPerfection API temporarily disabled)
   const submitForm = async () => {
     console.log('Form submitted:', formData);
     
+    // TODO: Re-enable LeadPerfection integration when ready
+    // Keeping the original code commented for future use:
+    /*
     try {
       // Get LeadPerfection token
       console.log('Getting LeadPerfection token...');
@@ -93,6 +96,26 @@ export function AppProvider({ children }) {
       return { 
         success: false, 
         error: error.message || 'Failed to submit appointment to LeadPerfection' 
+      };
+    }
+    */
+    
+    // Temporary: Just return success without API call
+    try {
+      console.log('Form data processed locally (LeadPerfection API disabled)');
+      
+      return { 
+        success: true, 
+        formData,
+        message: 'Appointment submitted successfully'
+      };
+      
+    } catch (error) {
+      console.error('Error processing form:', error);
+      
+      return { 
+        success: false, 
+        error: error.message || 'Failed to process appointment' 
       };
     }
   };
