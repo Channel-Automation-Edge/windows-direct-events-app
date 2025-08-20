@@ -75,7 +75,7 @@ const Home = () => {
         className="rounded-xl shadow-lg p-8 w-full text-center md:text-left"
         style={{
           background: brandSettings?.accentColor 
-            ? `linear-gradient(to bottom right, ${brandSettings.accentColor}, ${brandSettings.accentColor}dd, ${brandSettings.accentColor}bb)`
+            ? `linear-gradient(to bottom right, ${brandSettings.accentColor}, ${brandSettings.accentColor || brandSettings.accentColor + 'dd'}, ${brandSettings.accentDark || brandSettings.accentColor + 'bb'})`
             : 'linear-gradient(to bottom right, #f97316, #ea580c, #dc2626)'
         }}
       >
@@ -93,6 +93,8 @@ const Home = () => {
           </Link>
         </div>
       </div>
+
+      
 
       {/* Enhanced Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -149,7 +151,7 @@ const Home = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-orange-500/10 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-orange-500" />
+                  <TrendingUp className="w-5 h-5 text-brand" />
                 </div>
                 <h2 className="text-lg font-semibold text-gray-800">Total Appointments</h2>
               </div>
@@ -159,14 +161,14 @@ const Home = () => {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 1.0 }}
-                className="text-4xl font-bold text-orange-500"
+                className="text-4xl font-bold text-brand"
               >
                 <AnimatedCounter value={156} duration={3} />
               </motion.p>
             </div>
             <p className="text-sm text-gray-600 font-medium">This month</p>
             <div className="absolute bottom-2 right-2 opacity-20 group-hover:opacity-30 transition-opacity">
-              <CalendarIcon className="w-8 h-8 text-orange-500" />
+              <CalendarIcon className="w-8 h-8 text-brand" />
             </div>
           </div>
         </motion.div>

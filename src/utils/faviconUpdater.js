@@ -15,11 +15,13 @@ export const updateFavicon = (faviconUrl) => {
 /**
  * Update CSS custom properties for brand colors
  */
-export const updateBrandColors = (accentColor) => {
+export const updateBrandColors = (accentColor, accentDark, accentDarker) => {
   if (!accentColor) return;
   
-  // Set CSS custom property for brand color
+  // Set CSS custom properties for brand colors
   document.documentElement.style.setProperty('--brand-color', accentColor);
+  if (accentDark) document.documentElement.style.setProperty('--brand-color-dark', accentDark);
+  if (accentDarker) document.documentElement.style.setProperty('--brand-color-darker', accentDarker);
   
   // Update Tailwind brand color classes dynamically
   const style = document.createElement('style');
@@ -28,6 +30,8 @@ export const updateBrandColors = (accentColor) => {
     .bg-brand { background-color: ${accentColor} !important; }
     .border-brand { border-color: ${accentColor} !important; }
     .from-brand { --tw-gradient-from: ${accentColor} !important; }
+    ${accentDark ? `.bg-brand-dark { background-color: ${accentDark} !important; }` : ''}
+    ${accentDarker ? `.bg-brand-darker { background-color: ${accentDarker} !important; }` : ''}
   `;
   
   // Remove existing brand color styles
@@ -70,7 +74,7 @@ export const applyBrandSettings = async (databaseService) => {
       updateFavicon(brandSettings.favicon);
     }
     if (brandSettings.accentColor) {
-      updateBrandColors(brandSettings.accentColor);
+      updateBrandColors(brandSettings.accentColor, brandSettings.accentDark, brandSettings.accentDarker);
     }
   }
   

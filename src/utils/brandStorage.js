@@ -39,6 +39,8 @@ export const extractBrandSettings = (formData) => {
     logo: formData.content?.logo || null,
     favicon: formData.favicon || null,
     accentColor: formData.colors?.accent || null,
+    accentDark: formData.colors?.dark || null,
+    accentDarker: formData.colors?.darker || null,
     timestamp: Date.now()
   };
 };
