@@ -42,7 +42,8 @@ const Gallery = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    setSearchParams({ tab });
+    const currentParams = Object.fromEntries(searchParams.entries());
+    setSearchParams({ ...currentParams, tab });
   };
 
   const tabs = [
@@ -122,9 +123,9 @@ const Gallery = () => {
             <div className="h-1 w-24 bg-gradient-to-r from-brand via-brand to-transparent mb-6 rounded-full"></div>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore our portfolio of successful basement renovation projects. 
-            See the quality and craftsmanship that sets us apart.
-          </p>
+          Explore our portfolio of successful home improvement projects. 
+          See the quality and craftsmanship that sets us apart.
+        </p>
         </div>
       
       {/* Navigation Tabs */}
@@ -205,7 +206,7 @@ const PastProjectsTab = ({ data, currentPage, projectsPerPage }) => {
       <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
         <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
         <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+          Join hundreds of satisfied customers who have transformed their homes with our expert home improvement services.
         </p>
         <Link to="/new-appointment">
           <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
@@ -371,7 +372,7 @@ const VideosTab = ({ data }) => {
       <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
         <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
         <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+          Join hundreds of satisfied customers who have transformed their homes with our expert home improvement services.
         </p>
         <Link to="/new-appointment">
           <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
@@ -459,7 +460,7 @@ const BeforeAfterTab = ({ data }) => {
       <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
         <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
         <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+          Join hundreds of satisfied customers who have transformed their homes with our expert home improvement services.
         </p>
         <Link to="/new-appointment">
           <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">
@@ -573,7 +574,7 @@ const PhotosTab = ({ data }) => {
       <div className="bg-gradient-to-r from-brand to-brand/80 rounded-xl p-8 text-center text-white">
         <h2 className="text-2xl font-bold mb-4">Ready to Start Your Project?</h2>
         <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-          Join hundreds of satisfied customers who have transformed their homes with our expert basement renovation services.
+          Join hundreds of satisfied customers who have transformed their homes with our expert home improvement services.
         </p>
         <Link to="/new-appointment">
           <Button className="bg-white text-brand hover:bg-gray-50 border-0 gap-2">

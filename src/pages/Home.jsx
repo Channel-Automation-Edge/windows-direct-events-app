@@ -7,6 +7,7 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Calendar, FolderOpen, RefreshCw, Video, Play, Camera, ArrowRight } from 'lucide-react';
 import { databaseService } from '../services/databaseService';
 import { getBrandSettings } from '../utils/brandStorage';
+import { getNavigationUrl } from '../utils/urlHelper';
 
 // Counter animation component
 const AnimatedCounter = ({ value, duration = 2 }) => {
@@ -102,7 +103,7 @@ const Home = () => {
         <img 
           src={brandSettings?.logo || "https://f005.backblazeb2.com/file/project-starfish/logo/windows+direct+usa+logo+3.png"} 
           alt={`${brandSettings?.name || 'Your Company Name'} Logo`} 
-          className="h-16 md:h-20 object-contain"
+          className="h-16 md:h-20 object-contain max-w-[270px]"
         />
       </div>
 
@@ -117,11 +118,11 @@ const Home = () => {
       >
         <h1 className="text-3xl font-bold mb-4 text-white">Welcome to {brandSettings?.name || 'Your Company Name'}</h1>
         <p className="text-orange-50 mb-6 max-w-2xl mx-auto md:mx-0">
-          Schedule your basement renovation consultation appointment with our expert team. 
-          Book your free in-home consultation today and discover premium basement renovation solutions.
+          Schedule your home improvement consultation appointment with our expert team. 
+          Book your free in-home consultation today and discover premium home improvement solutions.
         </p>
         <div className="flex justify-center md:justify-start">
-          <Link to="/new-appointment">
+          <Link to={getNavigationUrl("/new-appointment")}>
             <Button className="gap-2 bg-white text-brand hover:bg-gray-50 border-0">
               <Calendar size={18} />
               Create Appointment
@@ -147,8 +148,8 @@ const Home = () => {
             </h2>
             <div className="h-1 w-24 bg-gradient-to-r from-brand via-brand to-transparent mb-6 rounded-full"></div>
           </div>
-          <p className="text-base md:text-lg text-gray-600">
-            Discover the quality and craftsmanship that sets us apart. Browse our portfolio of successful basement renovations.
+          <p className="text-xl text-gray-600 max-w-3xl leading-relaxed">
+            Discover the quality and craftsmanship that sets us apart. Browse our portfolio of successful home improvement projects.
           </p>
         </motion.div>
 
@@ -162,12 +163,12 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <Link to="/gallery?tab=past-projects" className="group block">
+              <Link to={getNavigationUrl("/gallery", {tab: "past-projects"})} className="group block">
                 <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
                   <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200">
                     <img
                       src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800"
-                      alt="Featured basement renovation project"
+                      alt="Featured home improvement project"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
@@ -178,7 +179,7 @@ const Home = () => {
                         Featured Project
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold mb-2">Complete Basement Transformation</h3>
+                    <h3 className="text-xl font-bold mb-2">Complete Home Transformation</h3>
                     <p className="text-white/90 text-sm">Modern renovation with premium finishes and lighting</p>
                   </div>
                 </div>
@@ -193,7 +194,7 @@ const Home = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
-                <Link to="/new-appointment" className="group block">
+                <Link to={getNavigationUrl("/new-appointment")} className="group block">
                   <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                     <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
                       <img
@@ -220,7 +221,7 @@ const Home = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7 }}
               >
-                <Link to="/gallery?tab=photos" className="group block">
+                <Link to={getNavigationUrl("/gallery", {tab: "photos"})} className="group block">
                   <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                     <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
                       <img
@@ -251,7 +252,7 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              <Link to="/gallery?tab=before-after" className="group block">
+              <Link to={getNavigationUrl("/gallery", {tab: "before-after"})} className="group block">
                 <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                   <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
                     <img
@@ -278,7 +279,7 @@ const Home = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              <Link to="/gallery?tab=videos" className="group block">
+              <Link to={getNavigationUrl("/gallery", {tab: "videos"})} className="group block">
                 <div className="relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
                   <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200">
                     <img
@@ -312,7 +313,7 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.8 }}
               className="text-left"
             >
-              <Link to="/gallery" className="group inline-flex items-center gap-2 text-brand hover:text-brand/80 transition-colors duration-300">
+              <Link to={getNavigationUrl("/gallery")} className="group inline-flex items-center gap-2 text-brand hover:text-brand/80 transition-colors duration-300">
                 <span className="text-lg font-semibold">Explore Full Gallery</span>
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
               </Link>

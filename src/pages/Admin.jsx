@@ -659,7 +659,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           </div>
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6" role="alert">
             <p className="font-bold">Error Loading Data</p>
-            <p>{dataError}</p>
+            <p>{typeof dataError === 'string' ? dataError : JSON.stringify(dataError)}</p>
             <div className="mt-3">
               <Button 
                 onClick={() => {
@@ -1222,7 +1222,7 @@ const Admin = ({ isAuth, onAuthenticate }) => {
           <EventForm 
             event={editItem}
             onClose={closeModal}
-            onSuccess={handleSuccess}
+            onSuccess={(data) => handleSuccess(`Event ${editItem ? 'updated' : 'added'} successfully!`)}
           />
         )}
         

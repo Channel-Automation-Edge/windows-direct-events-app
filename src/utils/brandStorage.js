@@ -29,20 +29,41 @@ export const setBrandSettings = (settings) => {
 };
 
 /**
+ * Get current contractor ID from URL or default
+ */
+export const getCurrentContractorId = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const workspaceId = urlParams.get('workspace_id');
+  return workspaceId ? parseInt(workspaceId, 10) : 12347;
+};
+
+/**
  * Extract brand settings from form data
  */
-export const extractBrandSettings = (formData) => {
+export const extractBrandSettings = (formData, contractorId = null) => {
   if (!formData) return null;
   
   return {
+    contractorId: contractorId || getCurrentContractorId(),
     name: formData.name || 'Your Company Name',
     logo: formData.content?.logo || null,
     favicon: formData.favicon || null,
     accentColor: formData.colors?.accent || null,
+    accentRgba: formData.colors?.accent_rgba || null,
     accentDark: formData.colors?.dark || null,
     accentDarker: formData.colors?.darker || null,
     timestamp: Date.now()
   };
+};
+
+/**
+ * Check if stored brand settings are valid for current contractor
+ */
+export const isBrandSettingsValid = (brandSettings) => {
+  if (!brandSettings || !brandSettings.contractorId) return false;
+  
+  const currentContractorId = getCurrentContractorId();
+  return brandSettings.contractorId === currentContractorId;
 };
 
 /**

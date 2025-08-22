@@ -193,7 +193,7 @@ const ProjectDetail = () => {
       <div className="bg-gray-50 rounded-xl p-8 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Explore More Projects</h2>
         <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-          Discover more of our successful basement renovation projects to get inspired for your own home transformation.
+          Discover more of our successful home improvement projects to get inspired for your own home transformation.
         </p>
         <Link to="/gallery?tab=past-projects">
           <Button variant="secondary" className="gap-2">

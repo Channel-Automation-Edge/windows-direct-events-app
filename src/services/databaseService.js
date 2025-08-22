@@ -2,11 +2,15 @@ import supabase from '../config/supabase';
 
 /**
  * Database service to handle Supabase operations
- * Fetches data from the contractors table with id=203853
+ * Fetches data from the contractors table with id=12347
  */
 export const databaseService = {
-  // The ID of the form app record in the database
-  FORM_APP_ID: 203853,
+  // Get the form app ID from URL parameter or use default
+  get FORM_APP_ID() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const workspaceId = urlParams.get('workspace_id');
+    return workspaceId ? parseInt(workspaceId, 10) : 12347;
+  },
   
   /**
    * Get the current form app data structure

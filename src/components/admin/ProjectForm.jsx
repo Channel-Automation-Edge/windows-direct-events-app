@@ -6,7 +6,7 @@ const ProjectForm = ({ project, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     id: '',
     name: '',
-    tags: ['Basement Remodeling'],
+    tags: ['Home Improvement'],
     address: '',
     description: '',
     featured_image: '',
@@ -172,7 +172,7 @@ const ProjectForm = ({ project, onClose, onSuccess }) => {
               value={formData.tags.join(', ')}
               onChange={handleTagsChange}
               required
-              placeholder="Basement Remodeling, Windows, etc."
+              placeholder="Home Improvement, Windows, etc."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
             />
             <p className="text-xs text-gray-500 mt-1">Separate tags with commas</p>
